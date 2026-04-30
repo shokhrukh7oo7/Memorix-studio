@@ -9,6 +9,10 @@ const isPhoneValid = computed(() => {
   return phone.value.replace(/\D/g, '').length === 12
 })
 
+definePageMeta({
+    layout: "auth",
+})
+
 const goToOtp = () => {
   if (!isPhoneValid.value) return
   navigateTo('/auth/OtpPage')

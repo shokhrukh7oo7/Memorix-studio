@@ -5,6 +5,10 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 
 const name = ref('');
 
+definePageMeta({
+    layout: "auth",
+})
+
 const handleSubmit = () => {
     if (!name.value) return
 
