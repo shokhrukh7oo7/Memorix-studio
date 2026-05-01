@@ -265,53 +265,52 @@ const goTemplate = () => {
 </script>
 
 <template>
-  <!-- banner section end -->
-  <div class="banner-wrapper">
-    <div class="banner">
-      <img :src="bannerImg" alt="banner" class="banner-img" />
+    <!-- banner section end -->
+    <div class="banner-wrapper">
+      <div class="banner">
+        <img :src="bannerImg" alt="banner" class="banner-img" />
 
-      <div class="banner-overlay">
-        <h2 class="banner-title">International Woman’s Day</h2>
-        <p class="banner-subtitle">
-          Celebrate women with a gift as special as she is
-        </p>
-
-        <div class="banner-btn-wrapper">
-          <BaseButton class="banner-btn" size="sm" @click="goTemplate"
-            >Shop now</BaseButton
-          >
-        </div>
-
-        <div class="date-wrapper">
-          <p class="banner-promo">
-            30% off with promo code <strong>8MARCH</strong>
+        <div class="banner-overlay">
+          <h2 class="banner-title">International Woman’s Day</h2>
+          <p class="banner-subtitle">
+            Celebrate women with a gift as special as she is
           </p>
 
-          <div class="banner-timer">
-            <div class="time-box">{{ days }}d</div>
-            <div class="time-box">{{ hours }}h</div>
-            <div class="time-box">{{ minutes }}m</div>
-            <div class="time-box">{{ seconds }}s</div>
+          <div class="banner-btn-wrapper">
+            <BaseButton class="banner-btn" size="sm" @click="goTemplate"
+              >Shop now</BaseButton
+            >
+          </div>
+
+          <div class="date-wrapper">
+            <p class="banner-promo">
+              30% off with promo code <strong>8MARCH</strong>
+            </p>
+
+            <div class="banner-timer">
+              <div class="time-box">{{ days }}d</div>
+              <div class="time-box">{{ hours }}h</div>
+              <div class="time-box">{{ minutes }}m</div>
+              <div class="time-box">{{ seconds }}s</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <!-- banner section start -->
+    <!-- banner section start -->
 
-  <!-- template section start -->
-  <div class="template-wrapper">
-    <BaseActionCard
-      v-for="item in templateCard"
-      :key="item.id"
-      :image="item.image"
-      :text="item.text"
-      :button-text="item.buttonText"
-      @action="item.action"
-    />
-  </div>
-  <!-- template section end -->
-
+    <!-- template section start -->
+    <div class="template-wrapper">
+      <BaseActionCard
+        v-for="item in templateCard"
+        :key="item.id"
+        :image="item.image"
+        :text="item.text"
+        :button-text="item.buttonText"
+        @action="item.action"
+      />
+    </div>
+    <!-- template section end -->
   <!-- swiper section start -->
   <div class="swiper-container-wrapper">
     <!-- Categories section start -->

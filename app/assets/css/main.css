@@ -10,7 +10,7 @@
 @import "./variables.css";
 /* RESET CSS START */
 body {
-  background: #000;
+  background: var(--white-black-color);
 }
 * {
   margin: 0;
