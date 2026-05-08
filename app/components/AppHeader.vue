@@ -25,6 +25,7 @@ const handleLogout = () => {
 const goToLogin = () => {
   navigateTo("/auth/LoginPage");
 };
+
 </script>
 
 <template>

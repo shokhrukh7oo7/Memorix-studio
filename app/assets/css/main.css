@@ -987,6 +987,71 @@ textarea {
 }
 /* faq page end */
 /* ==================================================== */
+/* my orders start */
+.order-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  gap: 5px;
+}
+.my-orders-container .my-orders-item {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border-radius: var(--border-radius-default);
+  border: 1px solid var(--temp-border-color);
+}
+.my-orders-container .my-orders-item .my-order-image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 93px;
+}
+.my-orders-container .my-orders-item .my-order-content-wrapper h6 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--black-color);
+  line-height: 100%;
+  font-family: var(--font-work);
+}
+.my-orders-container .my-orders-item .my-order-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 8px;
+}
+.my-orders-container .my-orders-item .my-order-content-wrapper .pending {
+  display: inline;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 120%;
+  font-family: var(--font-jet);
+  background-color: #fffbeb;
+  color: #bf6a02;
+  padding: 4px;
+}
+.my-orders-container .my-orders-item .my-order-content-wrapper .completed {
+  display: inline;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 120%;
+  font-family: var(--font-jet);
+  background-color: #ebffee;
+  color: #14ae5c;
+  padding: 4px;
+}
+.my-orders-container .my-orders-item .my-order-content-wrapper .price {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-work);
+  line-height: 120%;
+  color: var(--black-color);
+}
+/* my orders end */
+/* ==================================================== */
 @media (max-width: 380px) {
   .template-wrapper .template-container .template-content-wrapper button {
     font-size: 11px;
