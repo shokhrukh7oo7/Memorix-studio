@@ -59,7 +59,7 @@ const historyOrders = [
       <BaseButton @click="goBack">
         <img :src="arrowLeft" alt="icon" />
       </BaseButton>
-      <h2>Templates</h2>
+      <h2>My orders</h2>
     </div>
 
     <!-- таб -->
