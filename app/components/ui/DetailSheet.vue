@@ -2,6 +2,14 @@
 // import type { BookCard } from '~/types'
 import type { BookCard } from "~/types/index";
 
+import { useRouter } from "#app";
+const router = useRouter();
+
+const chooseTemplate = () => {
+  close();
+  router.push("/upload");
+};
+
 const props = defineProps<{
   isOpen: boolean;
   card: BookCard | null;
@@ -64,7 +72,9 @@ const close = () => emit("close");
                 </div>
               </div>
 
-              <button class="details-submit-btn">Choose template</button>
+              <button class="details-submit-btn" @click="chooseTemplate">
+                Choose template
+              </button>
             </div>
           </div>
         </div>

@@ -856,10 +856,15 @@ textarea {
 .template-page-container .template-back-header {
   display: flex;
   flex-direction: row;
-  justify-content: start;
+  /* justify-content: start; */
+  justify-content: space-between;
   align-items: center;
   gap: 5px;
   margin: 12px 0;
+}
+.template-page-container .template-back-header .template-btn-wrapper {
+  display: flex;
+  align-items: center;
 }
 .template-page-container .template-back-header button {
   display: flex;
@@ -1221,6 +1226,10 @@ textarea {
   align-items: center;
 }
 /* order info end */
+/* ==================================================== */
+body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {
+  padding-right: 0 !important;
+}
 /* ==================================================== */
 @media (max-width: 380px) {
   .template-wrapper .template-container .template-content-wrapper button {
