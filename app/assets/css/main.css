@@ -868,6 +868,9 @@ textarea {
   color: var(--black-color);
   background-color: transparent;
 }
+.template-page-container .template-back-header button .btn__content {
+  display: flex;
+}
 .template-page-container .template-back-header button img {
   width: 24px;
   height: 24px;
@@ -1002,6 +1005,7 @@ textarea {
   padding: 5px;
   border-radius: var(--border-radius-default);
   border: 1px solid var(--temp-border-color);
+  text-decoration: none;
 }
 .my-orders-container .my-orders-item .my-order-image-wrapper {
   display: flex;
@@ -1051,6 +1055,172 @@ textarea {
   color: var(--black-color);
 }
 /* my orders end */
+/* ==================================================== */
+/* order info start */
+.order-product-card {
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.order-product-card .order-product-image {
+  display: flex;
+  width: 110px;
+  height: 140px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+}
+.order-product-card .order-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+.order-product-card .order-product-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.order-product-card .order-product-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-work);
+  line-height: 100%;
+  color: var(--black-color);
+}
+
+.order-product-card .order-product-content .prices {
+  display: flex;
+  gap: 10px;
+}
+
+.order-product-card .order-product-content .prices .old-price {
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--font-work);
+  line-height: 100%;
+  text-decoration: line-through;
+  color: var(--grey-color);
+}
+
+.order-product-card .order-product-content .prices .new-price {
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--font-work);
+  line-height: 100%;
+  color: var(--black-color);
+}
+
+.order-product-card .order-product-content .qty {
+  font-size: 16px;
+  font-family: var(--font-work);
+  font-weight: 900;
+  color: var(--black-color);
+  line-height: 100%;
+}
+
+.order-info-page .order-details {
+  margin-top: 24px;
+}
+
+.order-info-page .order-details h4 {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-jet);
+  line-height: 100%;
+  margin-bottom: 8px;
+  color: var(--black-color);
+}
+.order-info-page .order-details ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.order-info-page .order-details ul li {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 100%;
+  font-family: var(--font-work);
+  color: var(--black-grey-color);
+}
+.order-info-page .extra-services {
+  border-top: 1px solid var(--black-color);
+  padding: 16px 0;
+  margin-top: 24px;
+}
+
+.order-info-page .extra-services h4 {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-jet);
+  color: var(--black-color);
+  line-height: 100%;
+}
+
+.order-info-page .gift-card {
+  margin-top: 16px;
+  border: 1px solid var(--temp-border-color);
+  border-radius: 16px;
+  padding: 12px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.order-info-page .gift-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-info-page .gift-content label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-jet);
+  color: var(--black-color);
+}
+
+.order-info-page .gift-content p {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-work);
+  line-height: 120%;
+  color: var(--black-grey-color);
+}
+
+.order-info-page .gift-content strong {
+  font-weight: 700;
+  font-size: 14px;
+  font-family: var(--font-work);
+  color: var(--black-color);
+  line-height: 100%;
+}
+.order-info-page .gift-card {
+  position: relative;
+}
+.order-info-page .gift-card .gift-image {
+  width: 100%;
+  max-width: 145px;
+  height: 145px;
+}
+
+.order-info-page .gift-card .gift-image img {
+  position: absolute;
+  top: 0;
+  right: -5%;
+}
+
+.order-info-page .cart-total {
+  margin-top: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* order info end */
 /* ==================================================== */
 @media (max-width: 380px) {
   .template-wrapper .template-container .template-content-wrapper button {

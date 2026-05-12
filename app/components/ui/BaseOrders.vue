@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <div class="my-orders-container">
-    <div class="my-orders-item">
+    <NuxtLink to="/order-info" class="my-orders-item">
       <div class="my-order-image-wrapper">
         <img :src="image" alt="image" />
       </div>
@@ -23,7 +23,7 @@ defineProps<{
 
         <p class="price">{{ price }}</p>
       </div>
-    </div>
+    </NuxtLink>
   </div>
 </template>
 
