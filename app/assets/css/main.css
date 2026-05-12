@@ -1227,6 +1227,119 @@ textarea {
 }
 /* order info end */
 /* ==================================================== */
+/* upload (index) start */
+.upload-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.upload-page .upload-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-page .upload-content h6 {
+  font-size: 24px;
+  font-weight: 500;
+  font-family: var(--font-work);
+  line-height: 100%;
+  color: var(--black-color);
+}
+
+.upload-page .upload-content p {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-work);
+  line-height: 140%;
+  color: var(--black-grey-color);
+}
+
+.upload-page .upload-number {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upload-page .upload-number label {
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--fornt-main);
+  color: var(--black-color);
+  line-height: 140%;
+}
+.upload-page .upload-number input {
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--font-main);
+  color: var(--black-color);
+  padding: 12px 16px;
+  border-radius: var(--border-radius-circular);
+  border: 1px solid var(--display-grey-color);
+}
+
+.upload-page .upload-number input:focus {
+  border-color: var(--btn-color);
+  outline: none;
+}
+.upload-page .upload-add-photos {
+  width: 100%;
+}
+.upload-page .upload-add-photos button {
+  width: auto;
+}
+/* upload (index) end */
+/* ==================================================== */
+/* upload (upload) start */
+.template-page-container .template-back-header .template-logo-wrapper button {
+  padding: 12px;
+  font-weight: 400;
+  line-height: 100%;
+  color: var(--black-color);
+  font-family: var(--font-jet);
+  background-color: var(--temp-border-color);
+}
+.upload-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.upload-gallery .photo-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius-circular);
+}
+.upload-gallery .photo-card img {
+  width: 100%;
+  height: 204px;
+  object-fit: cover;
+  display: block;
+}
+.upload-gallery .delete-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: var(--white-color);
+  color: white;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.upload-gallery .delete-btn img {
+  width: 16px;
+  height: 16px;
+}
+.create-photo-album {
+  margin: 24px 0;
+}
+/* upload (upload) end */
+/* ==================================================== */
 body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {
   padding-right: 0 !important;
 }
