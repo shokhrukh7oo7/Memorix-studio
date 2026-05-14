@@ -107,7 +107,7 @@ const templateCard = [
     text: "Start from scratch",
     buttonText: "Upload images",
     action: () => {
-      console.log("upload image opened");
+      navigateTo("/upload");
       // тут потом открываешь file input
     },
   },

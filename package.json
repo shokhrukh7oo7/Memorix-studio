@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@pqina/pintura": "^8.97.1",
     "maska": "^1.5.2",
     "nuxt": "^4.4.2",
     "sweetalert2": "^11.26.24",

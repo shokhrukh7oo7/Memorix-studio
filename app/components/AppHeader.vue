@@ -2,6 +2,9 @@
 import { ref } from "vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 
+import logoMain from "~/assets/images/logo-main.png";
+import shoppingIcon from "~/assets/images/shopping.svg";
+
 // В реальном приложении замените на store (Pinia)
 const isLoggedIn = ref(true);
 const isMenuOpen = ref(false);
@@ -35,7 +38,7 @@ const goToLogin = () => {
         <!-- Logo -->
         <NuxtLink to="/" class="logo-link">
           <img
-            src="/assets/images/logo-main.png"
+            :src="logoMain"
             alt="memorix"
             class="logo-img"
           />
@@ -43,9 +46,9 @@ const goToLogin = () => {
 
         <div class="header-actions">
           <!-- Корзина -->
-          <button class="icon-btn">
-            <img src="/assets/images/shopping.svg" alt="cart" />
-          </button>
+          <NuxtLink to="/cart" aria-label="Cart" class="icon-btn">
+            <img :src="shoppingIcon" alt="cart" />
+          </NuxtLink>
 
           <!-- Секция авторизации -->
           <div v-if="isLoggedIn" class="user-menu-wrapper">

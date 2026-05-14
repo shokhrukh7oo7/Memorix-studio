@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
 
 import BaseButton from "~/components/ui/BaseButton.vue";
 
 import arrowLeft from "~/assets/images/arrow-left.svg";
 import trash from "~/assets/images/trash.svg";
+import arrowsOut from "~/assets/images/arrows-out.svg";
 
 import { useRouter } from "#app";
+import { saveUploadedPhotos, loadUploadedPhotos, type UploadedPhoto as StoredPhoto } from "~/utils/albumStorage";
 
 const router = useRouter();
 
@@ -14,26 +17,19 @@ const goBack = () => {
   router.back();
 };
 
-interface UploadedPhoto {
-  name: string;
-  url: string | ArrayBuffer | null;
-}
-
-const photos = ref<UploadedPhoto[]>([]);
+const photos = ref<StoredPhoto[]>([]);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-onMounted(() => {
-  const savedPhotos = localStorage.getItem("uploadedPhotos");
+const persist = () => saveUploadedPhotos(photos.value);
 
-  if (savedPhotos) {
-    photos.value = JSON.parse(savedPhotos);
-  }
+onMounted(() => {
+  photos.value = loadUploadedPhotos();
 });
 
 const removePhoto = (index: number) => {
   photos.value.splice(index, 1);
 
-  localStorage.setItem("uploadedPhotos", JSON.stringify(photos.value));
+  persist();
 };
 
 const openUpload = () => {
@@ -48,7 +44,7 @@ const addPhotos = (e: Event) => {
   const selectedFiles = Array.from(target.files);
 
   const readers = selectedFiles.map((file) => {
-    return new Promise<UploadedPhoto>((resolve) => {
+    return new Promise<StoredPhoto>((resolve) => {
       const reader = new FileReader();
 
       reader.onload = () => {
@@ -66,8 +62,63 @@ const addPhotos = (e: Event) => {
     // добавляем новые фото рядом со старыми
     photos.value = [...photos.value, ...newImages];
 
-    localStorage.setItem("uploadedPhotos", JSON.stringify(photos.value));
+    persist();
   });
+};
+
+const editPhoto = async (index: number) => {
+  const src = photos.value[index]?.url;
+  if (!src) return;
+
+  if (typeof window === "undefined") return;
+
+  try {
+    const { openDefaultEditor } = await import("@pqina/pintura");
+    await import("@pqina/pintura/pintura.css");
+
+    openDefaultEditor({
+      src: String(src),
+      imageWriter: {
+        mimeType: "image/jpeg",
+        quality: 0.92,
+      },
+      onProcess: (res: any) => {
+        const file = res?.dest;
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          photos.value[index] = {
+            ...photos.value[index],
+            url: reader.result,
+          };
+          persist();
+        };
+        reader.readAsDataURL(file);
+      },
+    });
+  } catch (e) {
+    Swal.fire({
+      icon: "error",
+      title: "Editor error",
+      text: "Could not open the photo editor. Please try again.",
+      width: "395px",
+    });
+  }
+};
+
+const createAlbum = () => {
+  if (!photos.value.length) {
+    Swal.fire({
+      icon: "info",
+      title: "No photos yet",
+      text: "Please upload at least 1 photo to create an album.",
+      width: "395px",
+    });
+    return;
+  }
+
+  router.push("/upload/processing");
 };
 </script>
 
@@ -103,12 +154,41 @@ const addPhotos = (e: Event) => {
       </button>
 
       <img :src="String(photo.url)" :alt="photo.name" />
+
+      <button class="edit-btn" @click="editPhoto(index)" aria-label="Edit photo">
+        <img :src="arrowsOut" alt="edit" />
+      </button>
     </div>
   </div>
 
   <div class="create-photo-album">
-    <BaseButton>Create photo album</BaseButton>
+    <BaseButton @click="createAlbum">Create photo album</BaseButton>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.photo-card {
+  position: relative;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: var(--white-color);
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-btn img {
+  width: 16px;
+  height: 16px;
+}
+</style>

@@ -1128,6 +1128,14 @@ textarea {
   margin-top: 24px;
 }
 
+.order-id-line {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-jet);
+  color: var(--black-grey-color);
+  margin: 0;
+}
+
 .order-info-page .order-details h4 {
   font-size: 14px;
   font-weight: 400;
