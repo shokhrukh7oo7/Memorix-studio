@@ -98,7 +98,7 @@ const templateCard = [
     text: "Use templates",
     buttonText: "Choose template",
     action: () => {
-      navigateTo("/auth/OtpPage");
+      navigateTo("/templates/templates");
     },
   },
   {
