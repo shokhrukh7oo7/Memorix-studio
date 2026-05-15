@@ -98,7 +98,7 @@ const templateCard = [
     text: "Use templates",
     buttonText: "Choose template",
     action: () => {
-      navigateTo("/templates/templates");
+      navigateTo("/templates");
     },
   },
   {
@@ -277,7 +277,7 @@ const goTemplate = () => {
         </p>
 
         <div class="banner-btn-wrapper">
-          <BaseButton class="banner-btn" size="sm" @click="goTemplate"
+          <BaseButton class="banner-btn" size="sm"
             >Shop now</BaseButton
           >
         </div>

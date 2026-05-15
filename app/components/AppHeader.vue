@@ -28,7 +28,6 @@ const handleLogout = () => {
 const goToLogin = () => {
   navigateTo("/auth/LoginPage");
 };
-
 </script>
 
 <template>
@@ -37,11 +36,7 @@ const goToLogin = () => {
       <div class="header-inner">
         <!-- Logo -->
         <NuxtLink to="/" class="logo-link">
-          <img
-            :src="logoMain"
-            alt="memorix"
-            class="logo-img"
-          />
+          <img :src="logoMain" alt="memorix" class="logo-img" />
         </NuxtLink>
 
         <div class="header-actions">
