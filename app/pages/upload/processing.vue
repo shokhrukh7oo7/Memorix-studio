@@ -37,7 +37,7 @@ onMounted(() => {
   thumbSrc.value = photos[0]?.url ? String(photos[0].url) : "";
 
   started.value = performance.now();
-  const duration = 3200000;
+  const duration = 3200;
 
   const tick = (now: number) => {
     const t = Math.min(1, (now - started.value) / duration);

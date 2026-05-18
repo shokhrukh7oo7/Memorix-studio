@@ -277,7 +277,7 @@ const goTemplate = () => {
         </p>
 
         <div class="banner-btn-wrapper">
-          <BaseButton class="banner-btn" size="sm"
+          <BaseButton class="banner-btn" size="sm" @click="goTemplate"
             >Shop now</BaseButton
           >
         </div>

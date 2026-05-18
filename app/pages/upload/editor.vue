@@ -9,6 +9,13 @@ import {
   type UploadedPhoto,
 } from "~/utils/albumStorage";
 
+import dotsImage from "~/assets/images/dots.svg";
+import arrowUndo from "~/assets/images/arrow-undo.svg";
+import arrowRedo from "~/assets/images/arrow-redo.svg";
+import history from "~/assets/images/history.svg";
+import allPage from "~/assets/images/all-page.svg";
+import moreDotsImage from "~/assets/images/more-dots.svg";
+
 const router = useRouter();
 
 const photos = ref<UploadedPhoto[]>([]);
@@ -74,7 +81,8 @@ const goBack = () => {
 };
 
 const goOrder = () => {
-  router.push("/upload/preview");
+  // router.push("/upload/preview");
+  router.push("/orders");
 };
 
 const prevSpread = () => {
@@ -93,7 +101,7 @@ const selectBottomTab = (tab: BottomTab) => {
 
 <template>
   <div class="editor-page">
-    <header class="editor-top">
+    <div class="editor-top">
       <BaseButton class="editor-icon-btn" @click="goBack">
         <img :src="arrowLeft" alt="Back" />
       </BaseButton>
@@ -106,62 +114,79 @@ const selectBottomTab = (tab: BottomTab) => {
         Order
       </BaseButton>
       <button type="button" class="editor-icon-btn ghost" aria-label="Remove">
-        −
+        <img :src="dotsImage" alt="icon" />
       </button>
-    </header>
-
-    <div class="editor-toolbar">
-      <span class="editor-tool">Undo</span>
-      <span class="editor-tool">Redo</span>
-      <span class="editor-tool">History</span>
-      <span class="editor-tool">All page</span>
-      <span class="editor-tool">More</span>
     </div>
 
-    <div class="editor-spread">
-      <div class="editor-page-side editor-page-fixed">
-        <p>THIS PAGE CAN NOT BE EDITED.</p>
+    <div class="editor-middle-container">
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <span class="editor-tool">
+            <img :src="arrowUndo" alt="icon" />
+            Undo
+          </span>
+          <span class="editor-tool">
+            <img :src="arrowRedo" alt="icon" />
+            Redo
+          </span>
+          <span class="editor-tool">
+            <img :src="history" alt="icon" />
+            History
+          </span>
+        </div>
+        <div class="toolbar-right">
+          <span class="editor-tool">
+            <img :src="allPage" alt="icon" />
+            All page
+          </span>
+          <span class="editor-tool">
+            <img :src="moreDotsImage" alt="icon" />
+            More
+          </span>
+        </div>
       </div>
-      <div class="editor-page-side editor-page-edit">
-        <img
-          v-if="rightPageUrl"
-          class="editor-page-photo"
-          :src="rightPageUrl"
-          alt=""
-        />
-        <p class="editor-placeholder-title">Title</p>
-        <p class="editor-placeholder-text">Enter text</p>
-      </div>
-    </div>
 
-    <nav class="editor-pager" aria-label="Spread navigation">
-      <button type="button" class="editor-pager-link" @click="prevSpread">
-        &lt; Cover
-      </button>
-      <span class="editor-pager-current"
-        >Page {{ spreadIndex + 1 }} ▾</span
-      >
-      <button
-        type="button"
-        class="editor-pager-link"
-        :disabled="spreadIndex >= photos.length - 1"
-        @click="nextSpread"
-      >
-        Next page &gt;
-      </button>
-    </nav>
+      <div class="editor-spread">
+        <div class="editor-page-side editor-page-fixed">
+          <p>THIS PAGE CAN NOT BE EDITED.</p>
+        </div>
+        <div class="editor-page-side editor-page-edit">
+          <img
+            v-if="rightPageUrl"
+            class="editor-page-photo"
+            :src="rightPageUrl"
+            alt=""
+          />
+          <p class="editor-placeholder-title">Title</p>
+          <p class="editor-placeholder-text">Enter text</p>
+        </div>
+      </div>
+
+      <nav class="editor-pager" aria-label="Spread navigation">
+        <button type="button" class="editor-pager-link" @click="prevSpread">
+          < Cover
+        </button>
+        <span class="editor-pager-current">Page {{ spreadIndex + 1 }} ▾</span>
+        <button
+          type="button"
+          class="editor-pager-link"
+          :disabled="spreadIndex >= photos.length - 1"
+          @click="nextSpread"
+        >
+          Next page >
+        </button>
+      </nav>
+    </div>
 
     <nav class="editor-bottom-tabs" aria-label="Editor tools">
       <button
-        v-for="tab in (
-          [
-            ['photos', 'Photos'],
-            ['ideas', 'Ideas'],
-            ['background', 'Background'],
-            ['sticker', 'Sticker'],
-            ['smart', 'Smart'],
-          ] as const
-        )"
+        v-for="tab in [
+          ['photos', 'Photos'],
+          ['ideas', 'Ideas'],
+          ['background', 'Background'],
+          ['sticker', 'Sticker'],
+          ['smart', 'Smart'],
+        ] as const"
         :key="tab[0]"
         type="button"
         class="editor-tab"
@@ -186,7 +211,7 @@ const selectBottomTab = (tab: BottomTab) => {
   padding-bottom: 32px;
 }
 
-.editor-top {
+.editor-page .editor-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -194,8 +219,103 @@ const selectBottomTab = (tab: BottomTab) => {
   margin-bottom: 4px;
 }
 
-.editor-order-btn :deep(.btn) {
-  min-width: 88px;
+.editor-page .editor-top .editor-icon-btn:hover {
+  background-color: transparent;
+}
+
+.editor-page .editor-top .editor-order-btn {
+  width: auto;
+  padding: 12px 50px;
+}
+
+.editor-page .editor-middle-container {
+  background-color: var(--temp-border-color);
+  padding: 12px;
+  border-radius: var(--border-radius-circular);
+}
+
+.editor-page .editor-middle-container .editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.editor-page .editor-middle-container .editor-toolbar .toolbar-left {
+  display: flex;
+  gap: 4px;
+}
+.editor-page .editor-middle-container .editor-toolbar .toolbar-right {
+  display: flex;
+  gap: 4px;
+}
+.editor-page
+  .editor-middle-container
+  .editor-toolbar
+  .toolbar-left
+  .editor-tool,
+.editor-page
+  .editor-middle-container
+  .editor-toolbar
+  .toolbar-right
+  .editor-tool {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--white-color);
+  padding: 8px;
+  border-radius: var(--border-radius-circular);
+}
+.editor-page
+  .editor-middle-container
+  .editor-toolbar
+  .toolbar-left
+  .editor-tool
+  img,
+.editor-page
+  .editor-middle-container
+  .editor-toolbar
+  .toolbar-right
+  .editor-tool
+  img {
+  width: 24px;
+}
+.editor-page
+  .editor-middle-container
+  .editor-toolbar
+  .toolbar-left
+  .editor-tool,
+.editor-middle-container .editor-toolbar .toolbar-right .editor-tool {
+  font-size: 10px;
+  font-weight: 400;
+  font-family: var(--font-jet);
+}
+
+.editor-page .editor-middle-container .editor-spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 125px 0;
+}
+.editor-page .editor-middle-container .editor-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-family: var(--font-jet);
+}
+
+.editor-page .editor-middle-container .editor-pager .editor-pager-link,
+.editor-page .editor-middle-container .editor-pager .editor-pager-current {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  font-family: var(--font-jet) !important;
+  border: none;
+  background: none;
+  color: var(--black-color);
+  font: inherit;
+  cursor: pointer;
+  padding: 4px;
 }
 
 .editor-icon-btn {
@@ -215,27 +335,9 @@ const selectBottomTab = (tab: BottomTab) => {
   padding: 4px 8px;
 }
 
-.editor-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--temp-border-color);
-}
-
-.editor-tool {
-  font-size: 11px;
-  font-weight: 500;
-  font-family: var(--font-jet);
-  color: var(--black-grey-color);
-}
-
-.editor-spread {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-}
+/* .editor-order-btn :deep(.btn) {
+  min-width: 88px;
+} */
 
 .editor-page-side {
   min-height: 160px;
@@ -287,24 +389,6 @@ const selectBottomTab = (tab: BottomTab) => {
   font-size: 12px;
   color: var(--black-grey-color);
   margin: 0;
-}
-
-.editor-pager {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  font-family: var(--font-work);
-  padding: 8px 0;
-}
-
-.editor-pager-link {
-  border: none;
-  background: none;
-  color: var(--btn-color);
-  font: inherit;
-  cursor: pointer;
-  padding: 4px;
 }
 
 .editor-pager-link:disabled {
