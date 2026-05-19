@@ -16,6 +16,12 @@ import history from "~/assets/images/history.svg";
 import allPage from "~/assets/images/all-page.svg";
 import moreDotsImage from "~/assets/images/more-dots.svg";
 
+import gallery from "~/assets/images/photos.svg";
+import ideas from "~/assets/images/ideas.svg";
+import background from "~/assets/images/background.svg";
+import sticker from "~/assets/images/sticker.svg";
+import smart from "~/assets/images/smart.svg";
+
 const router = useRouter();
 
 const photos = ref<UploadedPhoto[]>([]);
@@ -93,10 +99,10 @@ const nextSpread = () => {
   if (spreadIndex.value < photos.value.length - 1) spreadIndex.value += 1;
 };
 
-const selectBottomTab = (tab: BottomTab) => {
-  bottomTab.value = tab;
-  if (tab === "photos") void openPinturaForCurrent();
-};
+// const selectBottomTab = (tab: BottomTab) => {
+//   bottomTab.value = tab;
+//   if (tab === "photos") void openPinturaForCurrent();
+// };
 </script>
 
 <template>
@@ -179,162 +185,31 @@ const selectBottomTab = (tab: BottomTab) => {
     </div>
 
     <nav class="editor-bottom-tabs" aria-label="Editor tools">
-      <button
-        v-for="tab in [
-          ['photos', 'Photos'],
-          ['ideas', 'Ideas'],
-          ['background', 'Background'],
-          ['sticker', 'Sticker'],
-          ['smart', 'Smart'],
-        ] as const"
-        :key="tab[0]"
-        type="button"
-        class="editor-tab"
-        :class="{ active: bottomTab === tab[0] }"
-        @click="selectBottomTab(tab[0])"
-      >
-        {{ tab[1] }}
-      </button>
+      <BaseButton>
+        <img :src="gallery" alt="icon" />
+        Photos
+      </BaseButton>
+      <BaseButton>
+        <img :src="ideas" alt="icon" />
+        Ideas
+      </BaseButton>
+      <BaseButton>
+        <img :src="background" alt="icon" />
+        Background
+      </BaseButton>
+      <BaseButton>
+        <img :src="sticker" alt="icon" />
+        Sticker
+      </BaseButton>
+      <BaseButton>
+        <img :src="smart" alt="icon" />
+        Smart
+      </BaseButton>
     </nav>
-
-    <p class="editor-hint">
-      Photos opens filters and tools (Pintura) for the current page image.
-    </p>
   </div>
 </template>
 
 <style scoped>
-.editor-page {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-bottom: 32px;
-}
-
-.editor-page .editor-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.editor-page .editor-top .editor-icon-btn:hover {
-  background-color: transparent;
-}
-
-.editor-page .editor-top .editor-order-btn {
-  width: auto;
-  padding: 12px 50px;
-}
-
-.editor-page .editor-middle-container {
-  background-color: var(--temp-border-color);
-  padding: 12px;
-  border-radius: var(--border-radius-circular);
-}
-
-.editor-page .editor-middle-container .editor-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.editor-page .editor-middle-container .editor-toolbar .toolbar-left {
-  display: flex;
-  gap: 4px;
-}
-.editor-page .editor-middle-container .editor-toolbar .toolbar-right {
-  display: flex;
-  gap: 4px;
-}
-.editor-page
-  .editor-middle-container
-  .editor-toolbar
-  .toolbar-left
-  .editor-tool,
-.editor-page
-  .editor-middle-container
-  .editor-toolbar
-  .toolbar-right
-  .editor-tool {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  background-color: var(--white-color);
-  padding: 8px;
-  border-radius: var(--border-radius-circular);
-}
-.editor-page
-  .editor-middle-container
-  .editor-toolbar
-  .toolbar-left
-  .editor-tool
-  img,
-.editor-page
-  .editor-middle-container
-  .editor-toolbar
-  .toolbar-right
-  .editor-tool
-  img {
-  width: 24px;
-}
-.editor-page
-  .editor-middle-container
-  .editor-toolbar
-  .toolbar-left
-  .editor-tool,
-.editor-middle-container .editor-toolbar .toolbar-right .editor-tool {
-  font-size: 10px;
-  font-weight: 400;
-  font-family: var(--font-jet);
-}
-
-.editor-page .editor-middle-container .editor-spread {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 125px 0;
-}
-.editor-page .editor-middle-container .editor-pager {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  font-family: var(--font-jet);
-}
-
-.editor-page .editor-middle-container .editor-pager .editor-pager-link,
-.editor-page .editor-middle-container .editor-pager .editor-pager-current {
-  font-size: 12px !important;
-  font-weight: 400 !important;
-  font-family: var(--font-jet) !important;
-  border: none;
-  background: none;
-  color: var(--black-color);
-  font: inherit;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.editor-icon-btn {
-  padding: 0;
-  width: auto;
-  min-width: auto;
-  background: transparent;
-}
-
-.editor-icon-btn.ghost {
-  border: none;
-  background: transparent;
-  font-size: 22px;
-  line-height: 1;
-  color: var(--black-color);
-  cursor: pointer;
-  padding: 4px 8px;
-}
-
 /* .editor-order-btn :deep(.btn) {
   min-width: 88px;
 } */
@@ -400,14 +275,6 @@ const selectBottomTab = (tab: BottomTab) => {
   font-weight: 600;
 }
 
-.editor-bottom-tabs {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  padding: 12px 0;
-  border-top: 1px solid var(--temp-border-color);
-}
-
 .editor-tab {
   flex: 1;
   border: none;
@@ -424,13 +291,5 @@ const selectBottomTab = (tab: BottomTab) => {
 .editor-tab.active {
   background: var(--btn-color);
   color: var(--white-color);
-}
-
-.editor-hint {
-  font-size: 12px;
-  color: var(--black-grey-color);
-  font-family: var(--font-work);
-  margin: 0;
-  line-height: 130%;
 }
 </style>
