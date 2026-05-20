@@ -18,13 +18,17 @@ import backgroundIcon from "~/assets/images/background.svg";
 import stickerIcon from "~/assets/images/sticker.svg";
 import smartIcon from "~/assets/images/smart.svg";
 
-import { loadUploadedPhotos, loadBookDraft, type UploadedPhoto } from "~/utils/albumStorage";
+import {
+  loadUploadedPhotos,
+  loadBookDraft,
+  type UploadedPhoto,
+} from "~/utils/albumStorage";
 
 const router = useRouter();
 
 // --- СОСТОЯНИЕ ДАННЫХ ---
 const photos = ref<UploadedPhoto[]>([]);
-const totalPages = ref(10); 
+const totalPages = ref(10);
 const currentSpreadIndex = ref(0); // 0 = Обложка/Разворот 1, 1 = Разворот 2 и т.д.
 
 // Перечень доступных стилей макетов страниц
@@ -38,7 +42,7 @@ const layoutStyles = [
   { name: "Film Strip", slots: 3, class: "layout-film" },
   { name: "Magazine Style", slots: 1, class: "layout-magazine" },
   { name: "Pinterest Style", slots: 4, class: "layout-pinterest" },
-  { name: "Aesthetic Collage", slots: 3, class: "layout-aesthetic" }
+  { name: "Aesthetic Collage", slots: 3, class: "layout-aesthetic" },
 ];
 
 interface PageState {
@@ -72,7 +76,9 @@ function saveToHistory() {
 }
 
 const canUndo = computed(() => historyPointer.value > 0);
-const canRedo = computed(() => historyPointer.value < historyStack.value.length - 1);
+const canRedo = computed(
+  () => historyPointer.value < historyStack.value.length - 1,
+);
 
 function handleUndo() {
   if (!canUndo.value) return;
@@ -87,7 +93,9 @@ function handleRedo() {
 }
 
 // --- ОТКРЫТИЕ ВСПЛЫВАЮЩИХ МЕНЮ (МЕНЮ ИЗ МАКЕТА) ---
-const activeMenu = ref<"document" | "more" | "history" | "pages-select" | null>(null);
+const activeMenu = ref<"document" | "more" | "history" | "pages-select" | null>(
+  null,
+);
 
 function toggleMenu(menu: "document" | "more" | "history" | "pages-select") {
   activeMenu.value = activeMenu.value === menu ? null : menu;
@@ -107,7 +115,9 @@ const activeFilter = ref("all");
 
 // --- НАВИГАЦИЯ < COVER | PAGE X v | NEXT PAGE > ---
 const totalSpreadsCount = computed(() => bookSpreads.value.length);
-const currentSpread = computed(() => bookSpreads.value[currentSpreadIndex.value] || null);
+const currentSpread = computed(
+  () => bookSpreads.value[currentSpreadIndex.value] || null,
+);
 
 function goToPrev() {
   if (currentSpreadIndex.value > 0) {
@@ -135,7 +145,7 @@ onMounted(() => {
   if (draft?.bookPages) {
     totalPages.value = Number(draft.bookPages);
   }
-  
+
   generateInitialLayouts();
   // Сохраняем стартовую точку в историю изменений
   historyStack.value.push(JSON.stringify(bookSpreads.value));
@@ -173,7 +183,7 @@ function generateInitialLayouts() {
         layoutClass: leftStyle.class,
         photoIndices: leftIndices,
         textTitle: "Title",
-        textContent: "Enter text"
+        textContent: "Enter text",
       },
       rightPage: {
         pageNumber: rightPageNum,
@@ -181,21 +191,25 @@ function generateInitialLayouts() {
         layoutClass: rightStyle.class,
         photoIndices: rightIndices,
         textTitle: "Title",
-        textContent: "Enter text"
-      }
+        textContent: "Enter text",
+      },
     });
   }
   bookSpreads.value = tempSpreads;
 }
 
 // Изменение текста или замена фото (пример триггера сохранения истории)
-function updateText(pageSide: 'left' | 'right', type: 'title' | 'content', value: string) {
+function updateText(
+  pageSide: "left" | "right",
+  type: "title" | "content",
+  value: string,
+) {
   if (!currentSpread.value) return;
-  if (pageSide === 'left' && currentSpread.value.leftPage) {
-    if (type === 'title') currentSpread.value.leftPage.textTitle = value;
+  if (pageSide === "left" && currentSpread.value.leftPage) {
+    if (type === "title") currentSpread.value.leftPage.textTitle = value;
     else currentSpread.value.leftPage.textContent = value;
   } else {
-    if (type === 'title') currentSpread.value.rightPage.textTitle = value;
+    if (type === "title") currentSpread.value.rightPage.textTitle = value;
     else currentSpread.value.rightPage.textContent = value;
   }
   saveToHistory();
@@ -212,21 +226,32 @@ const goOrder = () => router.push("/orders");
 
 <template>
   <div class="editor-page" @click="closeAllMenus">
-    
     <div class="editor-top" @click.stop>
       <BaseButton class="editor-icon-btn" @click="goBack">
         <img :src="arrowLeft" alt="Back" />
       </BaseButton>
-      
-      <BaseButton class="editor-order-btn" variant="primary" size="sm" @click="goOrder">
+
+      <BaseButton
+        class="editor-order-btn"
+        variant="primary"
+        size="sm"
+        @click="goOrder"
+      >
         Order
       </BaseButton>
-      
-      <button type="button" class="editor-icon-btn ghost" @click="toggleMenu('document')">
+
+      <button
+        type="button"
+        class="editor-icon-btn ghost"
+        @click="toggleMenu('document')"
+      >
         <img :src="dotsImage" alt="Menu" />
       </button>
 
-      <div v-if="activeMenu === 'document'" class="dropdown-menu document-dropdown">
+      <div
+        v-if="activeMenu === 'document'"
+        class="dropdown-menu document-dropdown"
+      >
         <div class="input-group">
           <label>Project name</label>
           <input type="text" value="Custom travel book 11213" />
@@ -241,13 +266,14 @@ const goOrder = () => router.push("/orders");
           </li>
           <li><span class="icon">⚠️</span> Notices</li>
           <li><span class="icon">👁️</span> Preview</li>
-          <li class="danger-action" @click="goBack"><span class="icon">🚪</span> Leave editor and back to home page</li>
+          <li class="danger-action" @click="goBack">
+            <span class="icon">🚪</span> Leave editor and back to home page
+          </li>
         </ul>
       </div>
     </div>
 
     <div class="editor-middle-container" @click.stop>
-      
       <div class="editor-toolbar">
         <div class="toolbar-left">
           <button class="editor-tool" :disabled="!canUndo" @click="handleUndo">
@@ -260,7 +286,7 @@ const goOrder = () => router.push("/orders");
             <img :src="historyIcon" alt="History" /> History
           </button>
         </div>
-        
+
         <div class="toolbar-right">
           <button class="editor-tool" @click="toggleMenu('document')">
             <img :src="allPageIcon" alt="All page" /> All page
@@ -278,92 +304,195 @@ const goOrder = () => router.push("/orders");
           </ul>
         </div>
 
-        <div v-if="activeMenu === 'history'" class="dropdown-menu history-dropdown">
+        <div
+          v-if="activeMenu === 'history'"
+          class="dropdown-menu history-dropdown"
+        >
           <!-- <p class="menu-title">History Actions</p> -->
           <ul>
-            <li v-for="(h, idx) in historyStack" :key="idx" :class="{ active: idx === historyPointer }">
-              Action #{{ idx + 1 }} {{ idx === historyPointer ? '(Current)' : '' }}
+            <li
+              v-for="(h, idx) in historyStack"
+              :key="idx"
+              :class="{ active: idx === historyPointer }"
+            >
+              Action #{{ idx + 1 }}
+              {{ idx === historyPointer ? "(Current)" : "" }}
             </li>
           </ul>
         </div>
       </div>
 
       <div class="editor-spread" v-if="currentSpread">
-        
-        <div 
+        <div
           class="editor-page-side page-left"
           :class="{ 'fixed-cover-style': currentSpreadIndex === 0 }"
-          :style="{ backgroundColor: currentSpreadIndex !== 0 ? selectedBackground : '' }"
+          :style="{
+            backgroundColor: currentSpreadIndex !== 0 ? selectedBackground : '',
+          }"
         >
           <template v-if="currentSpreadIndex === 0">
             <div class="fixed-cover-content">
               <p>THIS PAGE CAN NOT BE EDITED</p>
             </div>
           </template>
-          
+
           <template v-else-if="currentSpread.leftPage">
-            <div class="page-layout-grid" :class="currentSpread.leftPage.layoutClass">
-              <div v-for="(photoIdx, pIdx) in currentSpread.leftPage.photoIndices" :key="pIdx" class="grid-photo-slot">
-                <img v-if="photoIdx !== -1" :src="String(photos[photoIdx]?.url)" />
+            <div
+              class="page-layout-grid"
+              :class="currentSpread.leftPage.layoutClass"
+            >
+              <div
+                v-for="(photoIdx, pIdx) in currentSpread.leftPage.photoIndices"
+                :key="pIdx"
+                class="grid-photo-slot"
+              >
+                <img
+                  v-if="photoIdx !== -1"
+                  :src="String(photos[photoIdx]?.url)"
+                />
                 <div v-else class="empty-slot-placeholder"><span>+</span></div>
               </div>
             </div>
-            <input class="page-title-input" :value="currentSpread.leftPage.textTitle" @input="e => updateText('left', 'title', (e.target as HTMLInputElement).value)" />
-            <input class="page-desc-input" :value="currentSpread.leftPage.textContent" @input="e => updateText('left', 'content', (e.target as HTMLInputElement).value)" />
+            <input
+              class="page-title-input"
+              :value="currentSpread.leftPage.textTitle"
+              @input="
+                (e) =>
+                  updateText(
+                    'left',
+                    'title',
+                    (e.target as HTMLInputElement).value,
+                  )
+              "
+            />
+            <input
+              class="page-desc-input"
+              :value="currentSpread.leftPage.textContent"
+              @input="
+                (e) =>
+                  updateText(
+                    'left',
+                    'content',
+                    (e.target as HTMLInputElement).value,
+                  )
+              "
+            />
           </template>
         </div>
 
-        <div class="editor-page-side page-right" :style="{ backgroundColor: selectedBackground }">
-          <div class="page-layout-grid" :class="currentSpread.rightPage.layoutClass">
-            <div v-for="(photoIdx, pIdx) in currentSpread.rightPage.photoIndices" :key="pIdx" class="grid-photo-slot">
-              <img v-if="photoIdx !== -1" :src="String(photos[photoIdx]?.url)" />
+        <div
+          class="editor-page-side page-right"
+          :style="{ backgroundColor: selectedBackground }"
+        >
+          <div
+            class="page-layout-grid"
+            :class="currentSpread.rightPage.layoutClass"
+          >
+            <div
+              v-for="(photoIdx, pIdx) in currentSpread.rightPage.photoIndices"
+              :key="pIdx"
+              class="grid-photo-slot"
+            >
+              <img
+                v-if="photoIdx !== -1"
+                :src="String(photos[photoIdx]?.url)"
+              />
               <div v-else class="empty-slot-placeholder"><span>+</span></div>
             </div>
           </div>
-          
-          <input class="page-title-input" :value="currentSpread.rightPage.textTitle" @input="e => updateText('right', 'title', (e.target as HTMLInputElement).value)" />
-          <input class="page-desc-input" :value="currentSpread.rightPage.textContent" @input="e => updateText('right', 'content', (e.target as HTMLInputElement).value)" />
-        </div>
 
+          <input
+            class="page-title-input"
+            :value="currentSpread.rightPage.textTitle"
+            @input="
+              (e) =>
+                updateText(
+                  'right',
+                  'title',
+                  (e.target as HTMLInputElement).value,
+                )
+            "
+          />
+          <input
+            class="page-desc-input"
+            :value="currentSpread.rightPage.textContent"
+            @input="
+              (e) =>
+                updateText(
+                  'right',
+                  'content',
+                  (e.target as HTMLInputElement).value,
+                )
+            "
+          />
+        </div>
       </div>
 
       <nav class="editor-pager" aria-label="Spread navigation">
-        <button type="button" class="editor-pager-link" :disabled="currentSpreadIndex === 0" @click="goToPrev">
+        <button
+          type="button"
+          class="editor-pager-link"
+          :disabled="currentSpreadIndex === 0"
+          @click="goToPrev"
+        >
           &lt; Cover
         </button>
-        
+
         <div class="pager-dropdown-wrap">
-          <span class="editor-pager-current" @click="toggleMenu('pages-select')">
-            Page {{ currentSpreadIndex * 2 + 1 }}-{{ currentSpreadIndex * 2 + 2 }} ▾
+          <span
+            class="editor-pager-current"
+            @click="toggleMenu('pages-select')"
+          >
+            Page {{ currentSpreadIndex * 2 + 1 }}-{{
+              currentSpreadIndex * 2 + 2
+            }}
+            ▾
           </span>
-          
-          <div v-if="activeMenu === 'pages-select'" class="dropdown-menu pager-select-dropdown">
+
+          <div
+            v-if="activeMenu === 'pages-select'"
+            class="dropdown-menu pager-select-dropdown"
+          >
             <ul>
-              <li 
-                v-for="(spread, index) in bookSpreads" 
+              <li
+                v-for="(spread, index) in bookSpreads"
                 :key="spread.id"
                 :class="{ active: index === currentSpreadIndex }"
                 @click="selectSpreadFromDropdown(index)"
               >
-                Spread {{ index + 1 }} (Pages {{ index * 2 + 1 }}-{{ index * 2 + 2 }})
+                Spread {{ index + 1 }} (Pages {{ index * 2 + 1 }}-{{
+                  index * 2 + 2
+                }})
               </li>
             </ul>
           </div>
         </div>
 
-        <button type="button" class="editor-pager-link" :disabled="currentSpreadIndex >= totalSpreadsCount - 1" @click="goToNext">
+        <button
+          type="button"
+          class="editor-pager-link"
+          :disabled="currentSpreadIndex >= totalSpreadsCount - 1"
+          @click="goToNext"
+        >
           Next page &gt;
         </button>
       </nav>
     </div>
 
     <div class="bottom-tools-section" @click.stop>
-      
       <div class="tool-content-panel">
         <div v-if="activeTool === 'photos'" class="tool-pane internal-photos">
           <div class="filter-bar">
-            <span :class="{ active: activeFilter === 'all' }" @click="activeFilter = 'all'">All photos</span>
-            <span :class="{ active: activeFilter === 'unused' }" @click="activeFilter = 'unused'">Unused</span>
+            <span
+              :class="{ active: activeFilter === 'all' }"
+              @click="activeFilter = 'all'"
+              >All photos</span
+            >
+            <span
+              :class="{ active: activeFilter === 'unused' }"
+              @click="activeFilter = 'unused'"
+              >Unused</span
+            >
           </div>
           <div class="horizontal-scroll-gallery">
             <div v-for="(img, idx) in photos" :key="idx" class="scroll-thumb">
@@ -374,17 +503,19 @@ const goOrder = () => router.push("/orders");
 
         <div v-if="activeTool === 'ideas'" class="tool-pane internal-ideas">
           <div class="horizontal-scroll-gallery">
-            <div 
-              v-for="style in layoutStyles" 
-              :key="style.name" 
+            <div
+              v-for="style in layoutStyles"
+              :key="style.name"
               class="style-idea-card"
-              @click="() => {
-                if(currentSpread) {
-                  currentSpread.rightPage.layoutClass = style.class;
-                  currentSpread.rightPage.layoutTitle = style.name;
-                  saveToHistory();
+              @click="
+                () => {
+                  if (currentSpread) {
+                    currentSpread.rightPage.layoutClass = style.class;
+                    currentSpread.rightPage.layoutTitle = style.name;
+                    saveToHistory();
+                  }
                 }
-              }"
+              "
             >
               <div class="mini-grid-preview"></div>
               <span>{{ style.name }}</span>
@@ -394,16 +525,43 @@ const goOrder = () => router.push("/orders");
 
         <div v-if="activeTool === 'background'" class="tool-pane internal-bg">
           <div class="color-picker-scroll">
-            <div class="color-circle" style="background: #ececec" @click="changeBackground('#ececec')"></div>
-            <div class="color-circle" style="background: #ffffff" @click="changeBackground('#ffffff')"></div>
-            <div class="color-circle" style="background: #fef08a" @click="changeBackground('#fef08a')"></div>
-            <div class="color-circle" style="background: #bfdbfe" @click="changeBackground('#bfdbfe')"></div>
-            <div class="color-circle" style="background: #bbf7d0" @click="changeBackground('#bbf7d0')"></div>
-            <div class="color-circle" style="background: #fbcfe8" @click="changeBackground('#fbcfe8')"></div>
+            <div
+              class="color-circle"
+              style="background: #ececec"
+              @click="changeBackground('#ececec')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #ffffff"
+              @click="changeBackground('#ffffff')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #fef08a"
+              @click="changeBackground('#fef08a')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #bfdbfe"
+              @click="changeBackground('#bfdbfe')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #bbf7d0"
+              @click="changeBackground('#bbf7d0')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #fbcfe8"
+              @click="changeBackground('#fbcfe8')"
+            ></div>
           </div>
         </div>
 
-        <div v-if="activeTool === 'sticker'" class="tool-pane internal-stickers">
+        <div
+          v-if="activeTool === 'sticker'"
+          class="tool-pane internal-stickers"
+        >
           <div class="horizontal-scroll-gallery">
             <div class="sticker-item">❤️</div>
             <div class="sticker-item">✈️</div>
@@ -421,24 +579,43 @@ const goOrder = () => router.push("/orders");
       </div>
 
       <nav class="editor-bottom-tabs" aria-label="Editor tools">
-        <button class="tab-btn-item" :class="{ active: activeTool === 'photos' }" @click="activeTool = 'photos'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'photos' }"
+          @click="activeTool = 'photos'"
+        >
           <img :src="galleryIcon" alt="Photos" /> <span>Photos</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'ideas' }" @click="activeTool = 'ideas'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'ideas' }"
+          @click="activeTool = 'ideas'"
+        >
           <img :src="ideasIcon" alt="Ideas" /> <span>Ideas</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'background' }" @click="activeTool = 'background'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'background' }"
+          @click="activeTool = 'background'"
+        >
           <img :src="backgroundIcon" alt="Background" /> <span>Background</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'sticker' }" @click="activeTool = 'sticker'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'sticker' }"
+          @click="activeTool = 'sticker'"
+        >
           <img :src="stickerIcon" alt="Sticker" /> <span>Sticker</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'smart' }" @click="activeTool = 'smart'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'smart' }"
+          @click="activeTool = 'smart'"
+        >
           <img :src="smartIcon" alt="Smart" /> <span>Smart</span>
         </button>
       </nav>
     </div>
-
   </div>
 </template>
 
@@ -477,7 +654,7 @@ const goOrder = () => router.push("/orders");
   width: 100%;
 }
 .document-dropdown {
-  top: 165px;
+  
   right: 16px;
   padding: 12px 16px;
 }
@@ -498,12 +675,18 @@ const goOrder = () => router.push("/orders");
   border-radius: 6px;
   font-size: 13px;
 }
-.document-dropdown ul, .more-dropdown ul, .history-dropdown ul, .pager-select-dropdown ul {
+.document-dropdown ul,
+.more-dropdown ul,
+.history-dropdown ul,
+.pager-select-dropdown ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.document-dropdown li, .more-dropdown li, .history-dropdown li, .pager-select-dropdown li {
+.document-dropdown li,
+.more-dropdown li,
+.history-dropdown li,
+.pager-select-dropdown li {
   padding: 10px 0;
   font-size: 13px;
   cursor: pointer;
@@ -511,7 +694,9 @@ const goOrder = () => router.push("/orders");
   align-items: center;
   gap: 8px;
 }
-.document-dropdown li:hover, .more-dropdown li:hover, .pager-select-dropdown li:hover {
+.document-dropdown li:hover,
+.more-dropdown li:hover,
+.pager-select-dropdown li:hover {
   background: #f8fafc;
 }
 .menu-info-item {
@@ -519,23 +704,36 @@ const goOrder = () => router.push("/orders");
   gap: 10px;
   align-items: flex-start;
 }
-.menu-info-item p { font-weight: 500; margin: 0; }
-.menu-info-item span { font-size: 10px; color: #94a3b8; }
-.danger-action { color: #ef4444; border-top: 1px solid #f1f5f9; }
+.menu-info-item p {
+  font-weight: 500;
+  margin: 0;
+}
+.menu-info-item span {
+  font-size: 10px;
+  color: #94a3b8;
+}
+.danger-action {
+  color: #ef4444;
+  border-top: 1px solid #f1f5f9;
+}
 
 .more-dropdown {
   top: 60px;
   right: 0;
 }
-.disabled-li { opacity: 0.4; cursor: not-allowed; }
+.disabled-li {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .pager-select-dropdown {
   bottom: 35px;
-  left: 50%;
+  left: 70%;
   transform: translateX(-50%);
-  max-height: 200px;
+  /* max-height: 200px; */
   overflow-y: auto;
-  width: 200px;
+  width: 339px;
+  top: auto;
 }
 .pager-select-dropdown li.active {
   background: var(--btn-color, #ff4d35);
@@ -550,7 +748,11 @@ const goOrder = () => router.push("/orders");
   background: #f1f5f9;
   position: relative;
 }
-.toolbar-left, .toolbar-right { display: flex; gap: 12px; }
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  gap: 12px;
+}
 .editor-tool {
   background: none;
   border: none;
@@ -561,8 +763,14 @@ const goOrder = () => router.push("/orders");
   color: #334155;
   cursor: pointer;
 }
-.editor-tool:disabled { opacity: 0.35; cursor: not-allowed; }
-.editor-tool img { width: 14px; height: 14px; }
+.editor-tool:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.editor-tool img {
+  width: 14px;
+  height: 14px;
+}
 
 /* РАЗВОРОТ КНИГИ */
 .editor-spread {
@@ -592,7 +800,11 @@ const goOrder = () => router.push("/orders");
   justify-content: center;
   text-align: center;
 }
-.fixed-cover-content { font-size: 11px; font-weight: bold; letter-spacing: 0.5px; }
+.fixed-cover-content {
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
 
 /* ДИНАМИЧЕСКИЕ СЕТКИ ФОТО */
 .page-layout-grid {
@@ -601,12 +813,25 @@ const goOrder = () => router.push("/orders");
   flex-grow: 1;
   margin-bottom: 12px;
 }
-.layout-magazine { grid-template-columns: 1fr; }
-.layout-minimal { grid-template-columns: 1fr 1fr; }
-.layout-collage { grid-template-columns: repeat(2, 1fr); }
-.layout-collage .grid-photo-slot:nth-child(1) { grid-column: span 2; }
-.layout-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-.layout-dump { grid-template-columns: repeat(3, 1fr); }
+.layout-magazine {
+  grid-template-columns: 1fr;
+}
+.layout-minimal {
+  grid-template-columns: 1fr 1fr;
+}
+.layout-collage {
+  grid-template-columns: repeat(2, 1fr);
+}
+.layout-collage .grid-photo-slot:nth-child(1) {
+  grid-column: span 2;
+}
+.layout-grid {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.layout-dump {
+  grid-template-columns: repeat(3, 1fr);
+}
 
 .grid-photo-slot {
   background: #e2e8f0;
@@ -614,20 +839,41 @@ const goOrder = () => router.push("/orders");
   overflow: hidden;
   position: relative;
 }
-.grid-photo-slot img { width: 100%; height: 100%; object-fit: cover; }
+.grid-photo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .empty-slot-placeholder {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  color: #94a3b8; font-size: 20px; border: 1px dashed #cbd5e1;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 20px;
+  border: 1px dashed #cbd5e1;
 }
 
 /* ИНПУТЫ ТЕКСТА НА СТРАНИЦАХ */
 .page-title-input {
-  background: transparent; border: none; font-size: 16px; font-weight: bold;
-  text-align: center; width: 100%; outline: none; margin-bottom: 2px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  outline: none;
+  margin-bottom: 2px;
 }
 .page-desc-input {
-  background: transparent; border: none; font-size: 12px; color: #64748b;
-  text-align: center; width: 100%; outline: none;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  width: 100%;
+  outline: none;
 }
 
 /* ПЕЙДЖЕР НАВИГАЦИИ */
@@ -637,10 +883,25 @@ const goOrder = () => router.push("/orders");
   align-items: center;
   padding: 8px 16px;
 }
-.pager-dropdown-wrap { position: relative; cursor: pointer; }
-.editor-pager-current { font-weight: 600; font-size: 13px; }
-.editor-pager-link { background: none; border: none; color: #334155; font-size: 13px; cursor: pointer; }
-.editor-pager-link:disabled { opacity: 0.3; cursor: not-allowed; }
+.pager-dropdown-wrap {
+  position: relative;
+  cursor: pointer;
+}
+.editor-pager-current {
+  font-weight: 600;
+  font-size: 13px;
+}
+.editor-pager-link {
+  background: none;
+  border: none;
+  color: #334155;
+  font-size: 13px;
+  cursor: pointer;
+}
+.editor-pager-link:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
 
 /* НИЖНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
 .bottom-tools-section {
@@ -656,10 +917,24 @@ const goOrder = () => router.push("/orders");
   align-items: center;
   padding: 10px 16px;
 }
-.tool-pane { width: 100%; }
-.filter-bar { display: flex; gap: 16px; font-size: 12px; margin-bottom: 8px; color: #64748b; }
-.filter-bar span { cursor: pointer; }
-.filter-bar span.active { color: black; font-weight: bold; border-bottom: 2px solid black; }
+.tool-pane {
+  width: 100%;
+}
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: #64748b;
+}
+.filter-bar span {
+  cursor: pointer;
+}
+.filter-bar span.active {
+  color: black;
+  font-weight: bold;
+  border-bottom: 2px solid black;
+}
 
 .horizontal-scroll-gallery {
   display: flex;
@@ -667,7 +942,12 @@ const goOrder = () => router.push("/orders");
   overflow-x: auto;
   padding-bottom: 4px;
 }
-.scroll-thumb img { width: 55px; height: 55px; object-fit: cover; border-radius: 6px; }
+.scroll-thumb img {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 6px;
+}
 
 .style-idea-card {
   display: flex;
@@ -676,15 +956,39 @@ const goOrder = () => router.push("/orders");
   font-size: 10px;
   cursor: pointer;
 }
-.mini-grid-preview { width: 45px; height: 45px; background: #e2e8f0; border-radius: 4px; border: 1px solid #cbd5e1; }
+.mini-grid-preview {
+  width: 45px;
+  height: 45px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+}
 
-.color-picker-scroll { display: flex; gap: 12px; }
-.color-circle { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #cbd5e1; cursor: pointer; }
+.color-picker-scroll {
+  display: flex;
+  gap: 12px;
+}
+.color-circle {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+}
 
-.sticker-item { font-size: 26px; cursor: pointer; }
+.sticker-item {
+  font-size: 26px;
+  cursor: pointer;
+}
 .ai-rearrange-btn {
-  width: 100%; background: #6366f1; color: white; border: none;
-  padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer;
+  width: 100%;
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 /* ТАБ БАР С КНОПКАМИ */
@@ -694,9 +998,21 @@ const goOrder = () => router.push("/orders");
   padding: 10px 0;
 }
 .tab-btn-item {
-  background: none; border: none; display: flex; flex-direction: column;
-  align-items: center; gap: 4px; font-size: 11px; color: #64748b; cursor: pointer;
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+  cursor: pointer;
 }
-.tab-btn-item.active { color: var(--btn-color, #ff4d35); }
-.tab-btn-item img { width: 20px; height: 20px; }
+.tab-btn-item.active {
+  color: var(--btn-color, #ff4d35);
+}
+.tab-btn-item img {
+  width: 20px;
+  height: 20px;
+}
 </style>
