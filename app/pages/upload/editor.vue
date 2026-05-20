@@ -11,6 +11,10 @@ import arrowRedo from "~/assets/images/arrow-redo.svg";
 import historyIcon from "~/assets/images/history.svg";
 import allPageIcon from "~/assets/images/all-page.svg";
 import moreDotsImage from "~/assets/images/more-dots.svg";
+import allPageTwoIcon from "~/assets/images/all-page-2.svg";
+import noticeIcon from "~/assets/images/notice.svg";
+import previewIcon from "~/assets/images/preview.svg";
+import leaveIcon from "~/assets/images/logout.svg";
 
 import galleryIcon from "~/assets/images/photos.svg";
 import ideasIcon from "~/assets/images/ideas.svg";
@@ -258,16 +262,29 @@ const goOrder = () => router.push("/orders");
         </div>
         <ul>
           <li class="menu-info-item">
-            <img :src="allPageIcon" />
+            <img :src="allPageTwoIcon" />
             <div>
               <p>All page</p>
               <span>Last saved: 21 Feb 2026, 12:17:23</span>
             </div>
           </li>
-          <li><span class="icon">⚠️</span> Notices</li>
-          <li><span class="icon">👁️</span> Preview</li>
+          <li>
+            <span class="icon">
+              <img :src="noticeIcon" alt="icon" />
+            </span>
+            Notices
+          </li>
+          <li>
+            <span class="icon">
+              <img :src="previewIcon" alt="icon" />
+            </span>
+            Preview
+          </li>
           <li class="danger-action" @click="goBack">
-            <span class="icon">🚪</span> Leave editor and back to home page
+            <span class="icon">
+              <img :src="leaveIcon" alt="icon" />
+            </span>
+            Leave editor and back to home page
           </li>
         </ul>
       </div>
@@ -620,103 +637,7 @@ const goOrder = () => router.push("/orders");
 </template>
 
 <style scoped>
-.editor-page {
-  position: relative;
-  background-color: #f8fafc;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-}
-
-/* ВЕРХНЯЯ ПАНЕЛЬ */
-.editor-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  position: relative;
-}
-
 /* ВСПЛЫВАЮЩИЕ МЕНЮ (DROPDOWNS НА МАКЕТЕ) */
-.dropdown-menu {
-  position: absolute;
-  left: 0;
-  top: 60px;
-  padding: 10px;
-  background: white;
-  border-radius: var(--border-radius-circular);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e2e8f0;
-  z-index: 50;
-  width: 100%;
-}
-.document-dropdown {
-  
-  right: 16px;
-  padding: 12px 16px;
-}
-.document-dropdown .input-group {
-  padding: 0 16px 12px;
-  border-bottom: 1px solid #f1f5f9;
-}
-.document-dropdown .input-group label {
-  font-size: 11px;
-  color: #64748b;
-  display: block;
-  margin-bottom: 4px;
-}
-.document-dropdown .input-group input {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-}
-.document-dropdown ul,
-.more-dropdown ul,
-.history-dropdown ul,
-.pager-select-dropdown ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.document-dropdown li,
-.more-dropdown li,
-.history-dropdown li,
-.pager-select-dropdown li {
-  padding: 10px 0;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.document-dropdown li:hover,
-.more-dropdown li:hover,
-.pager-select-dropdown li:hover {
-  background: #f8fafc;
-}
-.menu-info-item {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.menu-info-item p {
-  font-weight: 500;
-  margin: 0;
-}
-.menu-info-item span {
-  font-size: 10px;
-  color: #94a3b8;
-}
-.danger-action {
-  color: #ef4444;
-  border-top: 1px solid #f1f5f9;
-}
-
 .more-dropdown {
   top: 60px;
   right: 0;
@@ -741,36 +662,16 @@ const goOrder = () => router.push("/orders");
 }
 
 /* ТУЛБАР */
-.editor-toolbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background: #f1f5f9;
-  position: relative;
-}
 .toolbar-left,
 .toolbar-right {
   display: flex;
   gap: 12px;
 }
-.editor-tool {
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #334155;
-  cursor: pointer;
-}
-.editor-tool:disabled {
+
+/* .editor-tool:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-}
-.editor-tool img {
-  width: 14px;
-  height: 14px;
-}
+} */
 
 /* РАЗВОРОТ КНИГИ */
 .editor-spread {
@@ -905,9 +806,7 @@ const goOrder = () => router.push("/orders");
 
 /* НИЖНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
 .bottom-tools-section {
-  margin-top: auto;
-  background: white;
-  border-top: 1px solid #e2e8f0;
+  background-color: var(--white-color);
 }
 .tool-content-panel {
   background: #f8fafc;

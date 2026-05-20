@@ -1353,6 +1353,10 @@ textarea {
 .editor-page {
   display: flex;
   flex-direction: column;
+  position: relative;
+  background-color: var(--white-color);
+  min-height: 100vh;
+  overflow-x: hidden;
   gap: 12px;
   padding-bottom: 32px;
 }
@@ -1362,7 +1366,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 4px;
+  position: relative;
 }
 .editor-page .editor-top .editor-icon-btn {
   background-color: transparent;
@@ -1387,6 +1391,7 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 .editor-page .editor-middle-container .editor-toolbar .toolbar-left {
   display: flex;
@@ -1411,9 +1416,13 @@ textarea {
   justify-content: center;
   align-items: center;
   gap: 5px;
+  font-size: 10px;
+  font-weight: 400;
+  font-family: var(--font-jet);
   background-color: var(--white-color);
   padding: 8px;
   border-radius: var(--border-radius-circular);
+  border: none;
 }
 .editor-page
   .editor-middle-container
@@ -1429,15 +1438,111 @@ textarea {
   img {
   width: 24px;
 }
-.editor-page
-  .editor-middle-container
-  .editor-toolbar
-  .toolbar-left
-  .editor-tool,
-.editor-middle-container .editor-toolbar .toolbar-right .editor-tool {
+
+.editor-page .editor-middle-container .editor-toolbar .more-dropdown {
+  top: 60px;
+  right: 0;
+}
+.editor-page .dropdown-menu {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--white-color);
+  border-radius: var(--border-radius-circular);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--temp-border-color);
+  z-index: 50;
+}
+
+.editor-page .document-dropdown {
+  right: 16px;
+  padding: 12px 16px;
+}
+.editor-page .document-dropdown .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 0;
+}
+
+.editor-page .document-dropdown .input-group label {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--black-color);
+  font-family: var(--font-main);
+}
+.editor-page .document-dropdown .input-group input {
+  width: 100%;
+  border: 1px solid var(--temp-border-color);
+  padding: 6px 10px;
+  border-radius: var(--border-radius-circular);
+  font-size: 15px;
+  font-weight: 400;
+  font-family: var(--font-main);
+  color: var(--black-color);
+}
+
+.editor-page .document-dropdown ul,
+.editor-page .more-dropdown ul,
+.history-dropdown ul,
+.pager-select-dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.editor-page .document-dropdown ul li,
+.editor-page .more-dropdown ul li,
+.editor-page .history-dropdown ul li,
+.editor-page .pager-select-dropdown ul li {
+  padding: 5px 5px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-work);
+  gap: 8px;
+}
+
+.editor-page .document-dropdown ul li:hover,
+.editor-page .more-dropdown ul li:hover,
+.editor-page .history-dropdown ul li:hover,
+.editor-page .pager-select-dropdown ul li:hover {
+  background-color: var(--white-black-color);
+  border-radius: var(--border-radius-circular);
+}
+
+.editor-page .document-dropdown ul li img,
+.editor-page .more-dropdown ul li img,
+.editor-page .history-dropdown ul li img,
+.editor-page .pager-select-dropdown ul li img {
+  width: 32px;
+}
+
+.editor-page .document-dropdown ul li p,
+.editor-page .more-dropdown ul li p,
+.editor-page .history-dropdown ul li p,
+.editor-page .pager-select-dropdown ul li p {
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-work);
+  color: var(--black-color);
+}
+
+.editor-page .document-dropdown ul li span,
+.editor-page .more-dropdown ul li span,
+.editor-page .history-dropdown ul li span,
+.editor-page .pager-select-dropdown ul li span {
   font-size: 10px;
   font-weight: 400;
   font-family: var(--font-jet);
+  color: var(--grey-color);
 }
 
 .editor-page .editor-middle-container .editor-spread {
