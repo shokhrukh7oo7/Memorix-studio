@@ -674,33 +674,6 @@ const goOrder = () => router.push("/orders");
 } */
 
 /* РАЗВОРОТ КНИГИ */
-.editor-spread {
-  display: flex;
-  gap: 2px;
-  background: #cbd5e1;
-  padding: 8px;
-  width: 100%;
-  max-width: 760px;
-  margin: 20px auto;
-  aspect-ratio: 16 / 10;
-}
-.editor-page-side {
-  flex: 1;
-  background: #ececec;
-  position: relative;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-.fixed-cover-style {
-  background-color: #334155 !important;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
 .fixed-cover-content {
   font-size: 11px;
   font-weight: bold;

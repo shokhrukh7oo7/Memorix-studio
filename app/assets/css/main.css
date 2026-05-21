@@ -1383,7 +1383,7 @@ textarea {
 
 .editor-page .editor-middle-container {
   background-color: var(--temp-border-color);
-  padding: 12px;
+  padding: 8px;
   border-radius: var(--border-radius-circular);
 }
 
@@ -1545,12 +1545,12 @@ textarea {
   color: var(--grey-color);
 }
 
-.editor-page .editor-middle-container .editor-spread {
+/* .editor-page .editor-middle-container .editor-spread {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin: 125px 0;
-}
+} */
 .editor-page .editor-middle-container .editor-pager {
   display: flex;
   align-items: center;
@@ -1616,6 +1616,37 @@ textarea {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+}
+
+.editor-page .editor-middle-container .editor-spread {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-color);
+  border-radius: var(--border-radius-circular);
+  padding: 4px;
+  width: 100%;
+  max-width: 760px;
+  margin: clamp(50px, 10vh, 100px) auto;
+  aspect-ratio: 16 / 13.5;
+}
+.editor-page .editor-middle-container .editor-spread .editor-page-side {
+  flex: 1;
+  background: var(--bg-color-card);
+  position: relative;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.editor-page .editor-middle-container .editor-spread .fixed-cover-style {
+  background-color: var(--bg-color-card) !important;
+  color: var(--white-color);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 /* editor end */
 /* ==================================================== */
