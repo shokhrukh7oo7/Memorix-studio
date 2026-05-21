@@ -11,6 +11,8 @@ import {
   type UploadedPhoto,
 } from "~/utils/albumStorage";
 
+import addToCardIcon from "~/assets/images/add-to-card.svg";
+
 const router = useRouter();
 
 const photos = ref<UploadedPhoto[]>([]);
@@ -105,15 +107,27 @@ const addToCart = () => {
 
     <div class="preview-sheet">
       <h6 class="preview-sheet-header">Order summary</h6>
-      <div>
+      <div class="preview-book-info-wrapper">
         <div class="preview-book-info">
           <p class="preview-sheet-left">Book type & size</p>
-          <p class="preview-sheet-right">{{ bookPages }} pages</p>  
+          <p class="preview-sheet-right">{{ bookPages }} pages</p>
         </div>
 
         <div class="preview-book-info">
           <p class="preview-sheet-right">11.5" x 8.5" vertical hardcover</p>
           <p class="preview-sheet-left">$32.99</p>
+        </div>
+      </div>
+
+      <div class="preview-book-info-wrapper">
+        <div class="preview-book-info">
+          <p class="preview-sheet-left">Additional pages</p>
+          <p class="preview-sheet-right">0</p>
+        </div>
+
+        <div class="preview-book-info">
+          <p class="preview-sheet-right">0 x gloss paper</p>
+          <p class="preview-sheet-left">$0</p>
         </div>
       </div>
       <!-- <p class="preview-sheet-line">
@@ -124,6 +138,7 @@ const addToCart = () => {
       <p class="preview-sheet-muted">Additional pages: 0 × gloss paper — $0</p> -->
 
       <BaseButton class="preview-add-cart" @click="addToCart">
+        <img :src="addToCardIcon" alt="icon" />
         Add to cart
       </BaseButton>
     </div>
@@ -131,10 +146,6 @@ const addToCart = () => {
 </template>
 
 <style scoped>
-/* .preview-design-page {
-  padding-bottom: 32px;
-} */
-
 .preview-title {
   font-size: 24px;
   font-weight: 500;
@@ -164,10 +175,6 @@ const addToCart = () => {
   max-width: 760px;
   margin: 35px 0;
   aspect-ratio: 16 / 13.5;
-  /* border: 1px solid var(--temp-border-color);
-  border-radius: var(--border-radius-default);
-  overflow: hidden;
- */
 }
 
 .preview-spread-inner {
@@ -185,15 +192,6 @@ const addToCart = () => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  /* background: #4a4a4a;
-  color: #eee;
-  font-size: 10px;
-  font-family: var(--font-jet);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 8px; */
 }
 
 .preview-spread-right {
@@ -206,14 +204,6 @@ const addToCart = () => {
   justify-content: space-between;
   align-items: center;
   min-height: 180px;
-  /* position: relative;
-  background: #ececec;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: end;
-  padding: 10px;
-  min-height: 180px; */
 }
 
 .preview-spread-right img {
@@ -274,14 +264,48 @@ const addToCart = () => {
 .preview-sheet {
   margin-top: 8px;
   padding: 20px 16px;
-  border-radius: var(--border-radius-default) var(--border-radius-default) 0 0;
+  border-radius: var(--border-radius-default);
   border: 1px solid var(--temp-border-color);
-  border-bottom: none;
   background: var(--white-color);
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06);
 }
 
-.preview-sheet-line {
+.preview-sheet-header {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--black-grey-color);
+  font-family: var(--font-jet);
+  line-height: 100%;
+}
+
+.preview-book-info-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 10px 0;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--temp-border-color);
+}
+.preview-book-info-wrapper .preview-book-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.preview-book-info-wrapper .preview-book-info .preview-sheet-left {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-work);
+  color: var(--black-color);
+}
+
+.preview-book-info-wrapper .preview-book-info .preview-sheet-right {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-work);
+  color: var(--black-color);
+}
+
+/* .preview-sheet-line {
   margin: 0 0 4px;
   font-size: 14px;
   font-family: var(--font-work);
@@ -298,10 +322,15 @@ const addToCart = () => {
   color: var(--black-grey-color);
   font-family: var(--font-work);
   margin: 8px 0 16px;
-}
+} */
 
 .preview-add-cart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
+  font-size: 14px;
+  margin-top: 24px;
 }
 
 .preview-add-cart :deep(.btn) {
