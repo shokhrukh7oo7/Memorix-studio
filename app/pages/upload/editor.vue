@@ -229,6 +229,7 @@ function changeBackground(color: string) {
 
 const goBack = () => router.push("/upload/upload");
 const goOrder = () => router.push("/orders");
+const goPreview = () => router.push("/upload/preview");
 </script>
 
 <template>
@@ -337,7 +338,6 @@ const goOrder = () => router.push("/orders");
           v-if="activeMenu === 'history'"
           class="dropdown-menu history-dropdown"
         >
-          <!-- <p class="menu-title">History Actions</p> -->
           <ul>
             <li
               v-for="(h, idx) in historyStack"
@@ -644,6 +644,10 @@ const goOrder = () => router.push("/orders");
           <img :src="smartIcon" alt="Smart" /> <span>Smart</span>
         </button>
       </nav>
+
+      <div class="preview-design-btn-wrapper">
+        <BaseButton @click="goPreview"> Preview your design </BaseButton>
+      </div>
     </div>
   </div>
 </template>
@@ -782,8 +786,6 @@ const goOrder = () => router.push("/orders");
   cursor: not-allowed;
 }
 
-
-
 .style-idea-card {
   display: flex;
   flex-direction: column;
@@ -825,7 +827,4 @@ const goOrder = () => router.push("/orders");
   font-size: 12px;
   cursor: pointer;
 }
-
-
-
 </style>

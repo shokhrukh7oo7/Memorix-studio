@@ -1759,6 +1759,10 @@ textarea {
   width: 20px;
   height: 20px;
 }
+
+.editor-page .bottom-tools-section .preview-design-btn-wrapper button {
+  font-size: 14px;
+}
 /* editor end */
 /* ==================================================== */
 body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {

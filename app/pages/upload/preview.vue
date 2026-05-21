@@ -18,9 +18,7 @@ const activeIndex = ref(0);
 
 const draft = computed(() => loadBookDraft());
 
-const activePhoto = computed(
-  () => photos.value[activeIndex.value] ?? null,
-);
+const activePhoto = computed(() => photos.value[activeIndex.value] ?? null);
 
 const bookPages = computed(() => draft.value?.bookPages ?? 20);
 
@@ -106,12 +104,24 @@ const addToCart = () => {
     </div>
 
     <div class="preview-sheet">
-      <p class="preview-sheet-line">
+      <h6 class="preview-sheet-header">Order summary</h6>
+      <div>
+        <div class="preview-book-info">
+          <p class="preview-sheet-left">Book type & size</p>
+          <p class="preview-sheet-right">{{ bookPages }} pages</p>  
+        </div>
+
+        <div class="preview-book-info">
+          <p class="preview-sheet-right">11.5" x 8.5" vertical hardcover</p>
+          <p class="preview-sheet-left">$32.99</p>
+        </div>
+      </div>
+      <!-- <p class="preview-sheet-line">
         <strong>11.5″ × 8.5″ vertical hardcover</strong>
       </p>
       <p class="preview-sheet-line">{{ bookPages }} pages</p>
       <p class="preview-sheet-line price">$32.99</p>
-      <p class="preview-sheet-muted">Additional pages: 0 × gloss paper — $0</p>
+      <p class="preview-sheet-muted">Additional pages: 0 × gloss paper — $0</p> -->
 
       <BaseButton class="preview-add-cart" @click="addToCart">
         Add to cart
@@ -121,33 +131,43 @@ const addToCart = () => {
 </template>
 
 <style scoped>
-.preview-design-page {
+/* .preview-design-page {
   padding-bottom: 32px;
-}
+} */
 
 .preview-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 500;
   font-family: var(--font-work);
   color: var(--black-color);
-  margin: 8px 0 6px;
-  line-height: 1.1;
+  margin: 8px 0;
+  line-height: 100%;
 }
 
 .preview-sub {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   font-family: var(--font-work);
   color: var(--black-grey-color);
-  margin: 0 0 16px;
-  line-height: 130%;
+  width: 100%;
+  max-width: 250px;
+  line-height: 100%;
 }
 
 .preview-spread {
-  border: 1px solid var(--temp-border-color);
+  display: flex;
+  gap: 2px;
+  background: var(--bg-color);
+  border-radius: var(--border-radius-circular);
+  padding: 4px;
+  width: 100%;
+  max-width: 760px;
+  margin: 35px 0;
+  aspect-ratio: 16 / 13.5;
+  /* border: 1px solid var(--temp-border-color);
   border-radius: var(--border-radius-default);
   overflow: hidden;
-  margin-bottom: 12px;
+ */
 }
 
 .preview-spread-inner {
@@ -157,7 +177,15 @@ const addToCart = () => {
 }
 
 .preview-spread-left {
-  background: #4a4a4a;
+  background-color: var(--bg-color-card) !important;
+  color: var(--white-color);
+  border-top-left-radius: var(--border-radius-circular);
+  border-bottom-left-radius: var(--border-radius-circular);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* background: #4a4a4a;
   color: #eee;
   font-size: 10px;
   font-family: var(--font-jet);
@@ -165,18 +193,27 @@ const addToCart = () => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 8px;
+  padding: 8px; */
 }
 
 .preview-spread-right {
+  flex: 1;
+  background: #ececec;
   position: relative;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 180px;
+  /* position: relative;
   background: #ececec;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: end;
   padding: 10px;
-  min-height: 180px;
+  min-height: 180px; */
 }
 
 .preview-spread-right img {
@@ -191,15 +228,16 @@ const addToCart = () => {
 .preview-cap {
   position: relative;
   z-index: 1;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   font-family: var(--font-work);
+  color: var(--black-color);
 }
 
 .preview-cap.muted {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
-  color: var(--black-grey-color);
+  color: var(--black-color);
   margin-top: 4px;
 }
 
@@ -207,7 +245,7 @@ const addToCart = () => {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 8px 0 16px;
+  padding: 8px 0;
   scroll-snap-type: x mandatory;
 }
 
@@ -236,8 +274,7 @@ const addToCart = () => {
 .preview-sheet {
   margin-top: 8px;
   padding: 20px 16px;
-  border-radius: var(--border-radius-default) var(--border-radius-default) 0
-    0;
+  border-radius: var(--border-radius-default) var(--border-radius-default) 0 0;
   border: 1px solid var(--temp-border-color);
   border-bottom: none;
   background: var(--white-color);
