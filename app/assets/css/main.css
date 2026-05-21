@@ -1641,12 +1641,20 @@ textarea {
 .editor-page .editor-middle-container .editor-spread .fixed-cover-style {
   background-color: var(--bg-color-card) !important;
   color: var(--white-color);
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  border-top-left-radius: var(--border-radius-circular);
+  border-bottom-left-radius: var(--border-radius-circular);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+.editor-page .editor-middle-container .editor-spread .page-left {
+  border-top-left-radius: var(--border-radius-circular);
+  border-bottom-left-radius: var(--border-radius-circular);
+}
+.editor-page .editor-middle-container .editor-spread .page-right {
+  border-top-right-radius: var(--border-radius-circular);
+  border-bottom-right-radius: var(--border-radius-circular);
 }
 /* editor end */
 /* ==================================================== */

@@ -15,6 +15,9 @@ import allPageTwoIcon from "~/assets/images/all-page-2.svg";
 import noticeIcon from "~/assets/images/notice.svg";
 import previewIcon from "~/assets/images/preview.svg";
 import leaveIcon from "~/assets/images/logout.svg";
+import listImage from "~/assets/images/list.svg";
+import trashIcon from "~/assets/images/trashIcon.svg";
+import duplicateIcon from "~/assets/images/duplicate.svg";
 
 import galleryIcon from "~/assets/images/photos.svg";
 import ideasIcon from "~/assets/images/ideas.svg";
@@ -305,7 +308,7 @@ const goOrder = () => router.push("/orders");
         </div>
 
         <div class="toolbar-right">
-          <button class="editor-tool" @click="toggleMenu('document')">
+          <button class="editor-tool">
             <img :src="allPageIcon" alt="All page" /> All page
           </button>
           <button class="editor-tool" @click="toggleMenu('more')">
@@ -315,9 +318,18 @@ const goOrder = () => router.push("/orders");
 
         <div v-if="activeMenu === 'more'" class="dropdown-menu more-dropdown">
           <ul>
-            <li>➕ Add spreads</li>
-            <li class="disabled-li">❌ Remove spread</li>
-            <li class="disabled-li">📋 Duplicate spread</li>
+            <li>
+              <img :src="listImage" alt="icon" />
+              Add spreads
+            </li>
+            <li class="disabled-li">
+              <img :src="trashIcon" alt="icon" />
+              Remove spread
+            </li>
+            <li class="disabled-li">
+              <img :src="duplicateIcon" alt="icon" />
+              Duplicate spread
+            </li>
           </ul>
         </div>
 
