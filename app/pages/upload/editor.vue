@@ -685,13 +685,6 @@ const goOrder = () => router.push("/orders");
   cursor: not-allowed;
 } */
 
-/* РАЗВОРОТ КНИГИ */
-.fixed-cover-content {
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-}
-
 /* ДИНАМИЧЕСКИЕ СЕТКИ ФОТО */
 .page-layout-grid {
   display: grid;
@@ -789,49 +782,7 @@ const goOrder = () => router.push("/orders");
   cursor: not-allowed;
 }
 
-/* НИЖНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
-.bottom-tools-section {
-  background-color: var(--white-color);
-}
-.tool-content-panel {
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  min-height: 85px;
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-}
-.tool-pane {
-  width: 100%;
-}
-.filter-bar {
-  display: flex;
-  gap: 16px;
-  font-size: 12px;
-  margin-bottom: 8px;
-  color: #64748b;
-}
-.filter-bar span {
-  cursor: pointer;
-}
-.filter-bar span.active {
-  color: black;
-  font-weight: bold;
-  border-bottom: 2px solid black;
-}
 
-.horizontal-scroll-gallery {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-.scroll-thumb img {
-  width: 55px;
-  height: 55px;
-  object-fit: cover;
-  border-radius: 6px;
-}
 
 .style-idea-card {
   display: flex;
@@ -875,28 +826,6 @@ const goOrder = () => router.push("/orders");
   cursor: pointer;
 }
 
-/* ТАБ БАР С КНОПКАМИ */
-.editor-bottom-tabs {
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-}
-.tab-btn-item {
-  background: none;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: #64748b;
-  cursor: pointer;
-}
-.tab-btn-item.active {
-  color: var(--btn-color, #ff4d35);
-}
-.tab-btn-item img {
-  width: 20px;
-  height: 20px;
-}
+
+
 </style>

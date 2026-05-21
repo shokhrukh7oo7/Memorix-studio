@@ -1382,7 +1382,8 @@ textarea {
 }
 
 .editor-page .editor-middle-container {
-  background-color: var(--temp-border-color);
+  /* background-color: var(--temp-border-color); */
+  background-color: var(--white-black-color);
   padding: 8px;
   border-radius: var(--border-radius-circular);
 }
@@ -1618,6 +1619,78 @@ textarea {
   gap: 4px;
 }
 
+/* РАЗВОРОТ КНИГИ */
+.editor-page .editor-middle-container .editor-spread .fixed-cover-content {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--white-color);
+  font-family: var(--font-jet);
+}
+
+/* НИЖНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
+.editor-page .bottom-tools-section {
+  background-color: var(--white-color);
+}
+.editor-page .bottom-tools-section .tool-content-panel {
+  background: var(--white-black-color);
+  min-height: 85px;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+}
+.editor-page .bottom-tools-section .tool-content-panel .tool-pane {
+  width: 100%;
+}
+.editor-page .bottom-tools-section .tool-content-panel .tool-pane .filter-bar {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  margin-bottom: 8px;
+  font-family: var(--font-jet);
+  color: var(--grey-color);
+}
+.editor-page
+  .bottom-tools-section
+  .tool-content-panel
+  .tool-pane
+  .filter-bar
+  span {
+  cursor: pointer;
+}
+.editor-page
+  .bottom-tools-section
+  .tool-content-panel
+  .tool-pane
+  .filter-bar
+  span.active {
+  color: var(--black-color);
+  font-weight: 500;
+  border-bottom: 2px solid var(--black-color);
+}
+
+.editor-page
+  .bottom-tools-section
+  .tool-content-panel
+  .tool-pane
+  .horizontal-scroll-gallery {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  /* padding-bottom: 4px; */
+}
+.editor-page
+  .bottom-tools-section
+  .tool-content-panel
+  .tool-pane
+  .horizontal-scroll-gallery
+  .scroll-thumb
+  img {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: var(--border-radius-circular);
+}
+
 .editor-page .editor-middle-container .editor-spread {
   display: flex;
   gap: 2px;
@@ -1626,7 +1699,8 @@ textarea {
   padding: 4px;
   width: 100%;
   max-width: 760px;
-  margin: clamp(50px, 10vh, 100px) auto;
+  /* margin: clamp(50px, 10vh, 100px) auto; */
+  margin: 75px auto;
   aspect-ratio: 16 / 13.5;
 }
 .editor-page .editor-middle-container .editor-spread .editor-page-side {
@@ -1655,6 +1729,35 @@ textarea {
 .editor-page .editor-middle-container .editor-spread .page-right {
   border-top-right-radius: var(--border-radius-circular);
   border-bottom-right-radius: var(--border-radius-circular);
+}
+
+/* ТАБ БАР С КНОПКАМИ */
+.editor-page .bottom-tools-section .editor-bottom-tabs {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+}
+
+.editor-page .bottom-tools-section .tab-btn-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--black-color);
+  cursor: pointer;
+  padding: 4px;
+}
+.editor-page .bottom-tools-section .tab-btn-item.active {
+  color: var(--black-color);
+  background-color: var(--white-black-color);
+  border-radius: 4px;
+}
+.editor-page .bottom-tools-section .tab-btn-item img {
+  width: 20px;
+  height: 20px;
 }
 /* editor end */
 /* ==================================================== */
