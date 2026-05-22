@@ -1765,6 +1765,13 @@ textarea {
 }
 /* editor end */
 /* ==================================================== */
+.cart-page .cart-checkout-btn .btn__content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+/* ==================================================== */
 body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {
   padding-right: 0 !important;
 }
