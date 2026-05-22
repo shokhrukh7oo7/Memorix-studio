@@ -1773,6 +1773,10 @@ body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {
   .template-wrapper .template-container .template-content-wrapper button {
     font-size: 11px;
   }
+
+  .cart-card .cart-card-row .cart-card-body .cart-row-actions {
+    flex-direction: column;
+  }
 }
 @media (max-width: 380px) {
   .template-wrapper .template-container .template-content-wrapper h1 {

@@ -90,12 +90,14 @@ const openDetails = (card: BookCardType) => {
 
 <template>
   <div class="template-page-container">
-    <!-- назад -->
-    <div class="template-back-header">
-      <BaseButton @click="goBack">
-        <img :src="arrowLeft" alt="icon" />
-      </BaseButton>
-      <h2>Templates</h2>
+    <div class="template-btn-wrapper">
+      <!-- назад -->
+      <div class="template-back-header">
+        <BaseButton @click="goBack">
+          <img :src="arrowLeft" alt="icon" />
+        </BaseButton>
+        <h2>Templates</h2>
+      </div>
     </div>
 
     <!-- таб -->

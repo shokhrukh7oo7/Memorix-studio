@@ -12,6 +12,8 @@ import {
   loadBookDraft,
   type CartLine,
 } from "~/utils/albumStorage";
+import trashIcon from "~/assets/images/trash.svg";
+import arrowLeftCircleIcon from "~/assets/images/arrow-circle.svg";
 
 const router = useRouter();
 
@@ -82,10 +84,12 @@ const bookDraft = computed(() => loadBookDraft());
   <div class="cart-page">
     <div class="template-page-container">
       <div class="template-back-header">
-        <BaseButton @click="goBack">
-          <img :src="arrowLeft" alt="Back" />
-        </BaseButton>
-        <h2>Cart</h2>
+        <div class="template-btn-wrapper">
+          <BaseButton @click="goBack">
+            <img :src="arrowLeft" alt="Back" />
+          </BaseButton>
+          <h2>Cart</h2>
+        </div>
       </div>
     </div>
 
@@ -96,18 +100,23 @@ const bookDraft = computed(() => loadBookDraft());
             <img :src="line.coverDataUrl" alt="" />
           </div>
           <div class="cart-card-body">
-            <h3>{{ line.title }}</h3>
-            <p class="cart-prices">
-              <span class="old">{{ line.oldPrice }}</span>
-              <span class="new">{{ line.newPrice }}</span>
-            </p>
+            <div class="cart-card-body-content">
+              <h3>{{ line.title }}</h3>
+              <p class="cart-prices">
+                <span class="old">{{ line.oldPrice }}</span>
+                <span class="new">{{ line.newPrice }}</span>
+              </p>
+            </div>
             <div class="cart-row-actions">
               <div class="qty">
-                <button type="button" @click="qty = Math.max(1, qty - 1)">
-                  −
-                </button>
-                <span>{{ qty }}</span>
-                <button type="button" @click="qty += 1">+</button>
+                <p class="qty-title">Qty</p>
+                <div class="qty-counter-wrapper">
+                  <button type="button" @click="qty = Math.max(1, qty - 1)">
+                    −
+                  </button>
+                  <span>{{ qty }}</span>
+                  <button type="button" @click="qty += 1">+</button>
+                </div>
               </div>
               <button
                 type="button"
@@ -115,7 +124,7 @@ const bookDraft = computed(() => loadBookDraft());
                 aria-label="Remove"
                 @click="removeFromCart"
               >
-                🗑
+                <img :src="trashIcon" alt="icon" />
               </button>
             </div>
           </div>
@@ -163,7 +172,8 @@ const bookDraft = computed(() => loadBookDraft());
       </div>
 
       <BaseButton class="cart-checkout-btn" @click="openCheckoutModal">
-        Go to checkout →
+        Go to checkout
+        <img :src="arrowLeftCircleIcon" alt="icon" />
       </BaseButton>
     </template>
 
@@ -207,97 +217,202 @@ const bookDraft = computed(() => loadBookDraft());
 </template>
 
 <style scoped>
-.cart-page {
-  padding-bottom: 40px;
-}
-
-.cart-card {
-  border: 1px solid var(--temp-border-color);
-  border-radius: var(--border-radius-default);
-  padding: 12px;
-  margin-bottom: 16px;
-}
-
-.cart-card-row {
+.cart-card .cart-card-row {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
-.cart-thumb {
-  width: 100px;
-  height: 120px;
-  border-radius: 12px;
+.cart-card .cart-card-row .cart-thumb {
+  padding: 15px;
+  border-radius: var(--border-radius-circular);
   overflow: hidden;
   flex-shrink: 0;
   border: 1px solid var(--border-color);
 }
 
-.cart-thumb img {
+.cart-card .cart-card-row .cart-thumb img {
   width: 100%;
   height: 100%;
+  max-width: 110px;
+  min-height: 140px;
   object-fit: cover;
+  border-radius: var(--border-radius-circular);
 }
 
-.cart-card-body h3 {
-  font-size: 15px;
-  font-weight: 600;
+.cart-card .cart-card-row .cart-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cart-card .cart-card-row .cart-card-body h3 {
+  font-size: 16px;
+  font-weight: 700;
   font-family: var(--font-work);
+  color: var(--black-color);
   margin: 0 0 8px;
 }
 
-.cart-prices {
+.cart-card .cart-card-row .cart-card-body .cart-prices {
   margin: 0 0 10px;
 }
 
-.cart-prices .old {
+.cart-card .cart-card-row .cart-card-body .cart-prices .old {
   text-decoration: line-through;
   color: var(--grey-color);
   margin-right: 8px;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--font-work);
 }
 
-.cart-prices .new {
-  font-weight: 700;
-  font-size: 15px;
+.cart-card .cart-card-row .cart-card-body .cart-prices .new {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--black-color);
 }
 
-.cart-row-actions {
+.cart-card .cart-card-row .cart-card-body .cart-row-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.qty {
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .qty {
   display: flex;
   align-items: center;
   gap: 10px;
   font-family: var(--font-jet);
 }
 
-.qty button {
-  width: 32px;
-  height: 32px;
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .qty .qty-title {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--black-color);
+  font-family: var(--font-work);
+}
+
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .qty .qty-counter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   border: 1px solid var(--display-grey-color);
-  border-radius: 8px;
+  border-radius: var(--border-radius-circular);
+  padding: 4px;
+}
+
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .qty .qty-counter-wrapper button {
+  border: none;
   background: var(--white-color);
   cursor: pointer;
+  padding: 5px 10px;
+  font-size: clamp(10px, 1vw, 16px);
+  color: var(--black-color);
+}
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .qty .qty-counter-wrapper button:first-child {
+  border-right: 1px solid var(--display-grey-color);
+}
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .qty .qty-counter-wrapper button:last-child {
+  border-left: 1px solid var(--display-grey-color);
 }
 
-.cart-trash {
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .cart-trash {
   border: none;
-  background: var(--btn-color);
-  color: #fff;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  background: transparent;
   cursor: pointer;
+  padding: 14px 8px 8px;
+}
+
+.cart-card .cart-card-row .cart-card-body .cart-row-actions .cart-trash img {
+  width: 24px;
+  height: 24px;
+}
+
+.cart-page .cart-details {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--black-color);
+}
+
+.cart-page .cart-details h4 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--black-color);
+  font-family: var(--font-jet);
+  margin-bottom: 8px;
+}
+
+.cart-page .cart-details ul li {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--black-grey-color);
+  font-family: var(--font-work);
+}
+
+.cart-page .cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cart-page .cart-total h3 {
   font-size: 16px;
+  font-weight: 700;
+  color: var(--black-color);
+  font-family: var(--font-work);
 }
 
-.cart-details {
-  margin-top: 8px;
+.cart-page .extra-services {
+  margin: 16px 0;
 }
-
+.cart-page .extra-services h4 {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-jet);
+  color: var(--black-color);
+  margin-bottom: 16px;
+}
+.cart-page .extra-services .gift-card {
+  border: 1px solid var(--temp-border-color);
+  border-radius: var(--border-radius-default);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.cart-page .extra-services .gift-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  width: 50%;
+}
+.cart-page .extra-services .gift-content label {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-jet);
+  color: var(--black-color);
+}
+.cart-page .extra-services .gift-content p {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-work);
+  color: var(--black-grey-color);
+  line-height: 120%;
+}
+.cart-page .extra-services .gift-content strong {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-work);
+  color: var(--black-color);
+}
+.cart-page .extra-services .gift-card .gift-image {
+  width: 144px;
+  height: 144px;
+  position: absolute;
+  right: -10px;
+}
+.cart-page .extra-services .gift-card .gift-image img {
+  width: 100%;
+}
 .cart-checkout-btn {
   margin-top: 20px;
 }
