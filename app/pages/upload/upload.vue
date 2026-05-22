@@ -155,9 +155,9 @@ const createAlbum = () => {
 
       <img :src="String(photo.url)" :alt="photo.name" />
 
-      <button class="edit-btn" @click="editPhoto(index)" aria-label="Edit photo">
+      <!-- <button class="edit-btn" @click="editPhoto(index)" aria-label="Edit photo">
         <img :src="arrowsOut" alt="edit" />
-      </button>
+      </button> -->
     </div>
   </div>
 
