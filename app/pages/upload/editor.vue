@@ -395,40 +395,31 @@ const goPreview = () => router.push("/upload/preview");
       <div class="editor-spread" v-if="currentSpread">
         <!-- ЛЕВАЯ СТРАНИЦА -->
         <div
-          class="editor-page-side page-left"
-          :class="{ 'fixed-cover-style': currentSpreadIndex === 0 }"
-          :style="{ backgroundColor: currentSpreadIndex !== 0 ? selectedBackground : '' }"
-        >
-          <template v-if="currentSpreadIndex === 0">
-            <div class="fixed-cover-content">
-              <p>THIS PAGE CAN NOT BE EDITED</p>
-            </div>
-          </template>
+  class="editor-page-side page-left"
+  :class="{ 'fixed-cover-style': currentSpreadIndex === 0 }"
+  :style="{ backgroundColor: currentSpreadIndex !== 0 ? selectedBackground : '' }"
+>
+  <template v-if="currentSpreadIndex === 0">
+    <div class="fixed-cover-content">
+      <p>THIS PAGE CAN NOT BE EDITED</p>
+    </div>
+  </template>
 
-          <template v-else-if="currentSpread.leftPage">
-            <div class="page-layout-grid" :class="currentSpread.leftPage.layoutClass">
-              <div
-                v-for="(photoIdx, pIdx) in currentSpread.leftPage.photoIndices"
-                :key="pIdx"
-                class="grid-photo-slot"
-                @click="handleSlotClick('left', pIdx)"
-              >
-                <img v-if="photoIdx !== -1 && photos[photoIdx]" :src="String(photos[photoIdx]?.url)" />
-                <div v-else class="empty-slot-placeholder"><span>+</span></div>
-              </div>
-            </div>
-            <input
-              class="page-title-input"
-              :value="currentSpread.leftPage.textTitle"
-              @input="(e) => updateText('left', 'title', (e.target as HTMLInputElement).value)"
-            />
-            <input
-              class="page-desc-input"
-              :value="currentSpread.leftPage.textContent"
-              @input="(e) => updateText('left', 'content', (e.target as HTMLInputElement).value)"
-            />
-          </template>
-        </div>
+  <template v-else-if="currentSpread.leftPage">
+    <div class="page-layout-grid" :class="currentSpread.leftPage.layoutClass">
+      <div
+        v-for="(photoIdx, pIdx) in currentSpread.leftPage.photoIndices"
+        :key="pIdx"
+        class="grid-photo-slot"
+        @click="handleSlotClick('left', pIdx)"
+      >
+        <img v-if="photoIdx !== -1 && photos[photoIdx]" :src="String(photos[photoIdx]?.url)" />
+        <div v-else class="empty-slot-placeholder"><span>+</span></div>
+      </div>
+    </div>
+    
+    </template>
+</div>
 
         <!-- ПРАВАЯ СТРАНИЦА -->
         <div
@@ -447,16 +438,18 @@ const goPreview = () => router.push("/upload/preview");
             </div>
           </div>
 
-          <input
-            class="page-title-input"
-            :value="currentSpread.rightPage.textTitle"
-            @input="(e) => updateText('right', 'title', (e.target as HTMLInputElement).value)"
-          />
-          <input
-            class="page-desc-input"
-            :value="currentSpread.rightPage.textContent"
-            @input="(e) => updateText('right', 'content', (e.target as HTMLInputElement).value)"
-          />
+          <template v-if="currentSpreadIndex === 0">
+            <input
+              class="page-title-input"
+              :value="currentSpread.rightPage.textTitle"
+              @input="(e) => updateText('right', 'title', (e.target as HTMLInputElement).value)"
+            />
+            <input
+              class="page-desc-input"
+              :value="currentSpread.rightPage.textContent"
+              @input="(e) => updateText('right', 'content', (e.target as HTMLInputElement).value)"
+            />
+          </template>
         </div>
       </div>
 
@@ -776,6 +769,11 @@ const goPreview = () => router.push("/upload/preview");
 .scroll-thumb.selected-thumb {
   border-color: #6366f1; /* Красивый фиолетовый/синий цвет рамки */
   transform: scale(1.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--border-radius-circular);
+  padding: 0 2px;
 }
 .grid-photo-slot {
   cursor: pointer; /* Чтобы при наведении на пустой слот или фото было понятно, что туда можно кликнуть */
