@@ -36,7 +36,7 @@ const router = useRouter();
 // --- СОСТОЯНИЕ ДАННЫХ ---
 const photos = ref<UploadedPhoto[]>([]);
 const totalPages = ref(10);
-const currentSpreadIndex = ref(0); 
+const currentSpreadIndex = ref(0);
 
 // Индекс выбранной фотографии в нижней галерее (-1, если ничего не выбрано)
 const selectedPhotoIndex = ref<number>(-1);
@@ -53,18 +53,30 @@ const layoutStyles = [
   { name: "Aesthetic Collage", slots: 3, class: "layout-aesthetic" },
 ];
 
+interface StickerState {
+  id: string;
+  type: "emoji" | "svg" | "image";
+  value: string;
+  char: string;
+  x: number; // Процентное смещение (0-100) относительно родительской страницы
+  y: number; // Процентное смещение (0-100)
+  scale: number;
+  rotation: number;
+}
+
 interface PageState {
   pageNumber: number;
   layoutTitle: string;
   layoutClass: string;
-  photoIndices: number[]; 
+  photoIndices: number[];
   textTitle: string;
   textContent: string;
+  stickers?: StickerState[]; // Опциональный массив стикеров для страницы
 }
 
 interface SpreadState {
   id: number;
-  leftPage: PageState | null; 
+  leftPage: PageState | null;
   rightPage: PageState;
 }
 
@@ -83,7 +95,9 @@ function saveToHistory() {
 }
 
 const canUndo = computed(() => historyPointer.value > 0);
-const canRedo = computed(() => historyPointer.value < historyStack.value.length - 1);
+const canRedo = computed(
+  () => historyPointer.value < historyStack.value.length - 1,
+);
 
 function handleUndo() {
   if (!canUndo.value) return;
@@ -98,11 +112,15 @@ function handleRedo() {
 }
 
 // --- МЕНЮ И НАВИГАЦИЯ ---
-const activeMenu = ref<"document" | "more" | "history" | "pages-select" | null>(null);
+const activeMenu = ref<"document" | "more" | "history" | "pages-select" | null>(
+  null,
+);
 function toggleMenu(menu: "document" | "more" | "history" | "pages-select") {
   activeMenu.value = activeMenu.value === menu ? null : menu;
 }
-function closeAllMenus() { activeMenu.value = null; }
+function closeAllMenus() {
+  activeMenu.value = null;
+}
 
 type ToolTab = "photos" | "ideas" | "background" | "sticker" | "smart";
 const activeTool = ref<ToolTab>("photos");
@@ -110,7 +128,9 @@ const selectedBackground = ref("#ececec");
 const activeFilter = ref("all");
 
 const totalSpreadsCount = computed(() => bookSpreads.value.length);
-const currentSpread = computed(() => bookSpreads.value[currentSpreadIndex.value] || null);
+const currentSpread = computed(
+  () => bookSpreads.value[currentSpreadIndex.value] || null,
+);
 
 function goToPrev() {
   if (currentSpreadIndex.value > 0) {
@@ -150,7 +170,9 @@ function generateInitialLayouts() {
   const firstRightStyle = layoutStyles[0];
   const firstRightIndices: number[] = [];
   for (let s = 0; s < firstRightStyle.slots; s++) {
-    firstRightIndices.push(photoGlIdx < photos.value.length ? photoGlIdx++ : -1);
+    firstRightIndices.push(
+      photoGlIdx < photos.value.length ? photoGlIdx++ : -1,
+    );
   }
 
   tempSpreads.push({
@@ -163,6 +185,7 @@ function generateInitialLayouts() {
       photoIndices: firstRightIndices,
       textTitle: "Title",
       textContent: "Enter text",
+      stickers: [],
     },
   });
 
@@ -191,6 +214,7 @@ function generateInitialLayouts() {
         photoIndices: rightIndices,
         textTitle: "Title",
         textContent: "Enter text",
+        stickers: [],
       };
     } else {
       rightPageData = {
@@ -200,6 +224,7 @@ function generateInitialLayouts() {
         photoIndices: [-1],
         textTitle: "",
         textContent: "",
+        stickers: [],
       };
     }
 
@@ -212,6 +237,7 @@ function generateInitialLayouts() {
         photoIndices: leftIndices,
         textTitle: "Title",
         textContent: "Enter text",
+        stickers: [],
       },
       rightPage: rightPageData,
     });
@@ -229,10 +255,11 @@ function handleSelectPhoto(idx: number) {
 
 // Клик по слоту на странице (вставка выбранного фото)
 function handleSlotClick(pageSide: "left" | "right", slotIndex: number) {
-const targetSpread = bookSpreads.value[currentSpreadIndex.value];
+  const targetSpread = bookSpreads.value[currentSpreadIndex.value];
   if (!targetSpread) return;
 
-  const targetPage = pageSide === "left" ? targetSpread.leftPage : targetSpread.rightPage;
+  const targetPage =
+    pageSide === "left" ? targetSpread.leftPage : targetSpread.rightPage;
   if (!targetPage) return;
 
   // ЕСЛИ СНИЗУ ВЫБРАНА ФОТОГРАФИЯ — вставляем её в слот
@@ -240,7 +267,7 @@ const targetSpread = bookSpreads.value[currentSpreadIndex.value];
     targetPage.photoIndices[slotIndex] = selectedPhotoIndex.value;
     saveToHistory();
     selectedPhotoIndex.value = -1; // Сбрасываем выделение в галерее
-  } 
+  }
   // ЕСЛИ СНИЗУ НИЧЕГО НЕ ВЫБРАНО И КЛИКНУЛИ ПО ЗАНЯТОМУ СЛОТУ — очищаем его
   else if (targetPage.photoIndices[slotIndex] !== -1) {
     targetPage.photoIndices[slotIndex] = -1; // Возвращаем пустой слот (+)
@@ -248,7 +275,11 @@ const targetSpread = bookSpreads.value[currentSpreadIndex.value];
   }
 }
 
-function updateText(pageSide: "left" | "right", type: "title" | "content", value: string) {
+function updateText(
+  pageSide: "left" | "right",
+  type: "title" | "content",
+  value: string,
+) {
   const targetSpread = bookSpreads.value[currentSpreadIndex.value];
   if (!targetSpread) return;
 
@@ -274,9 +305,9 @@ function applyLayoutToRightPage(styleClass: string, styleName: string) {
 
   targetSpread.rightPage.layoutClass = styleClass;
   targetSpread.rightPage.layoutTitle = styleName;
-  
+
   // Корректируем длину массива фото-индексов под новую сетку
-  const currentStyle = layoutStyles.find(s => s.class === styleClass);
+  const currentStyle = layoutStyles.find((s) => s.class === styleClass);
   if (currentStyle) {
     const currentLength = targetSpread.rightPage.photoIndices.length;
     if (currentLength < currentStyle.slots) {
@@ -284,10 +315,265 @@ function applyLayoutToRightPage(styleClass: string, styleName: string) {
         targetSpread.rightPage.photoIndices.push(-1);
       }
     } else if (currentLength > currentStyle.slots) {
-      targetSpread.rightPage.photoIndices = targetSpread.rightPage.photoIndices.slice(0, currentStyle.slots);
+      targetSpread.rightPage.photoIndices =
+        targetSpread.rightPage.photoIndices.slice(0, currentStyle.slots);
     }
   }
   saveToHistory();
+}
+
+// --- ФУНКЦИОНАЛЬНОСТЬ СТИКЕРОВ ---
+
+const stickerCategories = [
+  {
+    name: "😀",
+    items: [
+      { type: "emoji", value: "😀" },
+      { type: "emoji", value: "😂" },
+      { type: "emoji", value: "😍" },
+      { type: "emoji", value: "😎" },
+      { type: "emoji", value: "🤩" },
+      { type: "emoji", value: "🥳" },
+      { type: "emoji", value: "😢" },
+      { type: "emoji", value: "😡" },
+      { type: "emoji", value: "🤔" },
+      { type: "emoji", value: "🫡" },
+      { type: "emoji", value: "😁" },
+      { type: "emoji", value: "😏" },
+      { type: "emoji", value: "😛" },
+      { type: "emoji", value: "🫤" },
+      { type: "emoji", value: "😓" },
+      { type: "emoji", value: "🫠" },
+      { type: "emoji", value: "🙃" },
+      { type: "emoji", value: "😭" },
+      { type: "emoji", value: "🥵" },
+      { type: "emoji", value: "🥶" },
+    ],
+  },
+  {
+    name: "🙌",
+    items: [
+      { type: "emoji", value: "🙌" },
+      { type: "emoji", value: "💪" },
+      { type: "emoji", value: "🦵" },
+      { type: "emoji", value: "👂" },
+      { type: "emoji", value: "🦻" },
+      { type: "emoji", value: "👃" },
+      { type: "emoji", value: "🤏" },
+      { type: "emoji", value: "👇" },
+      { type: "emoji", value: "👆" },
+      { type: "emoji", value: "🫵" },
+      { type: "emoji", value: "☝️" },
+      { type: "emoji", value: "👉" },
+      { type: "emoji", value: "👈" },
+      { type: "emoji", value: "✌️" },
+      { type: "emoji", value: "🤞" },
+      { type: "emoji", value: "🖖" },
+      { type: "emoji", value: "🫱" },
+      { type: "emoji", value: "🫲" },
+      { type: "emoji", value: "🫳" },
+      { type: "emoji", value: "🫴" },
+      { type: "emoji", value: "🫷" },
+      { type: "emoji", value: "🫸" },
+      { type: "emoji", value: "🤘" },
+      { type: "emoji", value: "🤙" },
+      { type: "emoji", value: "🖐️" },
+    ]
+  },
+  {
+    name: "🍕",
+    items: [
+      { type: "emoji", value: "🍕" },
+      { type: "emoji", value: "🍔" },
+      { type: "emoji", value: "🍟" },
+      { type: "emoji", value: "🌭" },
+      { type: "emoji", value: "🍿" },
+      { type: "emoji", value: "🧂" },
+      { type: "emoji", value: "🥓" },
+      { type: "emoji", value: "🥚" },
+      { type: "emoji", value: "🥗" },
+      { type: "emoji", value: "🍗" },
+      { type: "emoji", value: "🥩" },
+      { type: "emoji", value: "☕" },
+      { type: "emoji", value: "🍷" },
+      { type: "emoji", value: "🍹" },
+      { type: "emoji", value: "🍸" },
+      { type: "emoji", value: "🍉" },
+      { type: "emoji", value: "🥭" },
+      { type: "emoji", value: "🍍" },
+      { type: "emoji", value: "🍌" },
+      { type: "emoji", value: "🍋" },
+      { type: "emoji", value: "🍒" },
+      { type: "emoji", value: "🍓" },
+      { type: "emoji", value: "🌽" },
+      { type: "emoji", value: "🍆" },
+    ]
+  },
+  {
+    name: "❤️",
+    items: [
+      { type: "emoji", value: "❤️" },
+      { type: "emoji", value: "✨" },
+      { type: "emoji", value: "🔥" },
+      { type: "emoji", value: "🎉" },
+      { type: "emoji", value: "👑" },
+      { type: "emoji", value: "💘" },
+      { type: "emoji", value: "💖" },
+      { type: "emoji", value: "💗" },
+      { type: "emoji", value: "💓" },
+      { type: "emoji", value: "💞" },
+      { type: "emoji", value: "💔" },
+    ],
+  },
+  {
+    name: "✈️",
+    items: [
+      { type: "emoji", value: "✈️" },
+      { type: "emoji", value: "🌍" },
+      { type: "emoji", value: "📸" },
+      { type: "emoji", value: "🏖️" },
+      { type: "emoji", value: "🧳" },
+      { type: "emoji", value: "🗺️" },
+    ],
+  },
+  {
+    name: "🔔",
+    items: [
+      { type: "emoji", value: "☀️" },
+      { type: "emoji", value: "🌙" },
+      { type: "emoji", value: "⭐" },
+      { type: "emoji", value: "⚡" },
+      { type: "emoji", value: "💤" },
+      { type: "emoji", value: "🌈" },
+    ],
+  },
+];
+
+// Состояние активной категории в панели
+const activeStickerCategory = ref(0);
+
+// Добавить стикер на активную (правую по умолчанию или левую если доступна) страницу
+function addStickerToCurrentPage(stickerItem: { type: string; value: string }) {
+  const targetSpread = bookSpreads.value[currentSpreadIndex.value];
+  if (!targetSpread) return;
+
+  if (!targetSpread.stickers) targetSpread.stickers = [];
+
+  targetSpread.stickers.push({
+    id: "sticker_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+    type: stickerItem.type as "emoji" | "svg" | "image",
+    value: stickerItem.value,
+    x: 40, // Начальная позиция ближе к центру
+    y: 35,
+    scale: 1,
+    rotation: 0,
+  });
+
+  saveToHistory();
+}
+
+// Удалить стикер (Right Click)
+function deleteSticker(page: PageState, stickerId: string) {
+  if (!page.stickers) return;
+  page.stickers = page.stickers.filter((s) => s.id !== stickerId);
+  saveToHistory();
+}
+
+// Вращение стикера (Double Click) - поворот на 45 градусов при каждом вызове
+function rotateSticker(sticker: StickerState) {
+  sticker.rotation = (sticker.rotation + 45) % 360;
+  saveToHistory();
+}
+
+// Масштабирование стикера колесиком мыши (Mouse wheel)
+function handleStickerWheel(event: WheelEvent, sticker: StickerState) {
+  event.preventDefault();
+  const delta = event.deltaY < 0 ? 0.1 : -0.1;
+  sticker.scale = Math.max(0.5, Math.min(3, sticker.scale + delta));
+  saveToHistory();
+}
+
+// Перетаскивание стикеров (Мышь и Touch события)
+let activeDragSticker: StickerState | null = null;
+let startX = 0;
+let startY = 0;
+let startStickerX = 0;
+let startStickerY = 0;
+let dragContainer: HTMLElement | null = null;
+
+function startDrag(
+  event: MouseEvent | TouchEvent,
+  sticker: StickerState,
+  pageClass: string,
+) {
+  // Игнорируем правый клик для начала перемещения, чтобы работал контекстный сброс
+  if (event instanceof MouseEvent && event.button !== 0) return;
+
+  activeDragSticker = sticker;
+
+  // Ищем родительский контейнер страницы
+  const targetElement = event.currentTarget as HTMLElement;
+  // dragContainer = targetElement.closest(".editor-page-side") as HTMLElement;
+  dragContainer = targetElement.closest(".editor-spread") as HTMLElement;
+
+  const clientX =
+    event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
+  const clientY =
+    event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
+
+  startX = clientX;
+  startY = clientY;
+  startStickerX = sticker.x;
+  startStickerY = sticker.y;
+
+  if (event instanceof MouseEvent) {
+    window.addEventListener("mousemove", onDragging);
+    window.addEventListener("mouseup", stopDrag);
+  } else {
+    window.addEventListener("touchmove", onDragging, { passive: false });
+    window.addEventListener("touchend", stopDrag);
+  }
+}
+
+function onDragging(event: MouseEvent | TouchEvent) {
+  if (!activeDragSticker || !dragContainer) return;
+
+  if (event instanceof TouchEvent) {
+    // Предотвращаем скролл экрана на мобильных во время перетаскивания
+    event.preventDefault();
+  }
+
+  const clientX =
+    event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
+  const clientY =
+    event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
+
+  const deltaX = clientX - startX;
+  const deltaY = clientY - startY;
+
+  // Конвертируем пиксели движения в проценты относительно размера страницы
+  const containerWidth = dragContainer.clientWidth;
+  const containerHeight = dragContainer.clientHeight;
+
+  const pctDeltaX = (deltaX / containerWidth) * 100;
+  const pctDeltaY = (deltaY / containerHeight) * 100;
+
+  activeDragSticker.x = Math.max(0, Math.min(90, startStickerX + pctDeltaX));
+  activeDragSticker.y = Math.max(0, Math.min(90, startStickerY + pctDeltaY));
+}
+
+function stopDrag(event: MouseEvent | TouchEvent) {
+  if (event instanceof MouseEvent) {
+    window.removeEventListener("mousemove", onDragging);
+    window.removeEventListener("mouseup", stopDrag);
+  } else {
+    window.removeEventListener("touchmove", onDragging);
+    window.removeEventListener("touchend", stopDrag);
+  }
+  if (activeDragSticker) {
+    activeDragSticker = null;
+    saveToHistory();
+  }
 }
 
 const goBack = () => router.push("/upload/upload");
@@ -319,7 +605,10 @@ const goPreview = () => router.push("/upload/preview");
         <img :src="dotsImage" alt="Menu" />
       </button>
 
-      <div v-if="activeMenu === 'document'" class="dropdown-menu document-dropdown">
+      <div
+        v-if="activeMenu === 'document'"
+        class="dropdown-menu document-dropdown"
+      >
         <div class="input-group">
           <label>Project name</label>
           <input type="text" value="Custom travel book 11213" />
@@ -374,80 +663,166 @@ const goPreview = () => router.push("/upload/preview");
         <div v-if="activeMenu === 'more'" class="dropdown-menu more-dropdown">
           <ul>
             <li><img :src="listImage" alt="icon" /> Add spreads</li>
-            <li class="disabled-li"><img :src="trashIcon" alt="icon" /> Remove spread</li>
-            <li class="disabled-li"><img :src="duplicateIcon" alt="icon" /> Duplicate spread</li>
+            <li class="disabled-li">
+              <img :src="trashIcon" alt="icon" /> Remove spread
+            </li>
+            <li class="disabled-li">
+              <img :src="duplicateIcon" alt="icon" /> Duplicate spread
+            </li>
           </ul>
         </div>
 
-        <div v-if="activeMenu === 'history'" class="dropdown-menu history-dropdown">
+        <div
+          v-if="activeMenu === 'history'"
+          class="dropdown-menu history-dropdown"
+        >
           <ul>
             <li
               v-for="(h, idx) in historyStack"
               :key="idx"
               :class="{ active: idx === historyPointer }"
             >
-              Action #{{ idx + 1 }} {{ idx === historyPointer ? "(Current)" : "" }}
+              Action #{{ idx + 1 }}
+              {{ idx === historyPointer ? "(Current)" : "" }}
             </li>
           </ul>
         </div>
       </div>
 
       <div class="editor-spread" v-if="currentSpread">
-        <!-- ЛЕВАЯ СТРАНИЦА -->
         <div
-  class="editor-page-side page-left"
-  :class="{ 'fixed-cover-style': currentSpreadIndex === 0 }"
-  :style="{ backgroundColor: currentSpreadIndex !== 0 ? selectedBackground : '' }"
->
-  <template v-if="currentSpreadIndex === 0">
-    <div class="fixed-cover-content">
-      <p>THIS PAGE CAN NOT BE EDITED</p>
-    </div>
-  </template>
+          class="editor-page-side page-left"
+          :class="{ 'fixed-cover-style': currentSpreadIndex === 0 }"
+          :style="{
+            backgroundColor: currentSpreadIndex !== 0 ? selectedBackground : '',
+          }"
+        >
+          <template v-if="currentSpreadIndex === 0">
+            <div class="fixed-cover-content">
+              <p>THIS PAGE CAN NOT BE EDITED</p>
+            </div>
+          </template>
 
-  <template v-else-if="currentSpread.leftPage">
-    <div class="page-layout-grid" :class="currentSpread.leftPage.layoutClass">
-      <div
-        v-for="(photoIdx, pIdx) in currentSpread.leftPage.photoIndices"
-        :key="pIdx"
-        class="grid-photo-slot"
-        @click="handleSlotClick('left', pIdx)"
-      >
-        <img v-if="photoIdx !== -1 && photos[photoIdx]" :src="String(photos[photoIdx]?.url)" />
-        <div v-else class="empty-slot-placeholder"><span>+</span></div>
-      </div>
-    </div>
-    
-    </template>
-</div>
+          <template v-else-if="currentSpread.leftPage">
+            <div class="page-content-wrapper">
+              <div
+                class="page-layout-grid"
+                :class="currentSpread.leftPage.layoutClass"
+              >
+                <div
+                  v-for="(photoIdx, pIdx) in currentSpread.leftPage
+                    .photoIndices"
+                  :key="pIdx"
+                  class="grid-photo-slot"
+                  @click="handleSlotClick('left', pIdx)"
+                >
+                  <img
+                    v-if="photoIdx !== -1 && photos[photoIdx]"
+                    :src="String(photos[photoIdx]?.url)"
+                  />
+                  <div v-else class="empty-slot-placeholder">
+                    <span>+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <!-- ПРАВАЯ СТРАНИЦА -->
+            <div
+              v-for="sticker in currentSpread.leftPage.stickers"
+              :key="sticker.id"
+              class="absolute-sticker"
+              :style="{
+                left: sticker.x + '%',
+                top: sticker.y + '%',
+                transform: `scale(${sticker.scale}) rotate(${sticker.rotation}deg)`,
+              }"
+              @mousedown="startDrag($event, sticker, 'left')"
+              @touchstart="startDrag($event, sticker, 'left')"
+              @wheel="handleStickerWheel($event, sticker)"
+              @dblclick="rotateSticker(sticker)"
+              @contextmenu.prevent="
+                deleteSticker(currentSpread.leftPage, sticker.id)
+              "
+            >
+              {{ sticker.char }}
+            </div>
+          </template>
+        </div>
+
         <div
           class="editor-page-side page-right"
           :style="{ backgroundColor: selectedBackground }"
         >
-          <div class="page-layout-grid" :class="currentSpread.rightPage.layoutClass">
+          <div class="page-content-wrapper">
             <div
-              v-for="(photoIdx, pIdx) in currentSpread.rightPage.photoIndices"
-              :key="pIdx"
-              class="grid-photo-slot"
-              @click="handleSlotClick('right', pIdx)"
+              class="page-layout-grid"
+              :class="currentSpread.rightPage.layoutClass"
             >
-              <img v-if="photoIdx !== -1 && photos[photoIdx]" :src="String(photos[photoIdx]?.url)" />
-              <div v-else class="empty-slot-placeholder"><span>+</span></div>
+              <div
+                v-for="(photoIdx, pIdx) in currentSpread.rightPage.photoIndices"
+                :key="pIdx"
+                class="grid-photo-slot"
+                @click="handleSlotClick('right', pIdx)"
+              >
+                <img
+                  v-if="photoIdx !== -1 && photos[photoIdx]"
+                  :src="String(photos[photoIdx]?.url)"
+                />
+                <div v-else class="empty-slot-placeholder"><span>+</span></div>
+              </div>
             </div>
+          </div>
+          <div
+            v-for="sticker in currentSpread.stickers"
+            :key="sticker.id"
+            class="absolute-sticker"
+            :class="{ 'text-badge': sticker.value.length > 4 }"
+            :style="{
+              left: sticker.x + '%',
+              top: sticker.y + '%',
+              transform: `scale(${sticker.scale}) rotate(${sticker.rotation}deg)`,
+            }"
+            @mousedown="startDrag($event, sticker)"
+            @touchstart="startDrag($event, sticker)"
+            @wheel="handleStickerWheel($event, sticker)"
+            @dblclick="rotateSticker(sticker)"
+            @contextmenu.prevent="deleteSticker(currentSpread, sticker.id)"
+          >
+            <template v-if="sticker.type === 'emoji'">
+              {{ sticker.value }}
+            </template>
+            <template v-else-if="sticker.type === 'svg'">
+              <img
+                :src="sticker.value"
+                style="width: 100%; height: 100%; object-fit: contain"
+              />
+            </template>
           </div>
 
           <template v-if="currentSpreadIndex === 0">
             <input
               class="page-title-input"
               :value="currentSpread.rightPage.textTitle"
-              @input="(e) => updateText('right', 'title', (e.target as HTMLInputElement).value)"
+              @input="
+                (e) =>
+                  updateText(
+                    'right',
+                    'title',
+                    (e.target as HTMLInputElement).value,
+                  )
+              "
             />
             <input
               class="page-desc-input"
               :value="currentSpread.rightPage.textContent"
-              @input="(e) => updateText('right', 'content', (e.target as HTMLInputElement).value)"
+              @input="
+                (e) =>
+                  updateText(
+                    'right',
+                    'content',
+                    (e.target as HTMLInputElement).value,
+                  )
+              "
             />
           </template>
         </div>
@@ -464,11 +839,20 @@ const goPreview = () => router.push("/upload/preview");
         </button>
 
         <div class="pager-dropdown-wrap">
-          <span class="editor-pager-current" @click="toggleMenu('pages-select')">
-            Page {{ currentSpreadIndex * 2 + 1 }}-{{ currentSpreadIndex * 2 + 2 }} ▾
+          <span
+            class="editor-pager-current"
+            @click="toggleMenu('pages-select')"
+          >
+            Page {{ currentSpreadIndex * 2 + 1 }}-{{
+              currentSpreadIndex * 2 + 2
+            }}
+            ▾
           </span>
 
-          <div v-if="activeMenu === 'pages-select'" class="dropdown-menu pager-select-dropdown">
+          <div
+            v-if="activeMenu === 'pages-select'"
+            class="dropdown-menu pager-select-dropdown"
+          >
             <ul>
               <li
                 v-for="(spread, index) in bookSpreads"
@@ -476,7 +860,9 @@ const goPreview = () => router.push("/upload/preview");
                 :class="{ active: index === currentSpreadIndex }"
                 @click="selectSpreadFromDropdown(index)"
               >
-                Spread {{ index + 1 }} (Pages {{ index * 2 + 1 }}-{{ index * 2 + 2 }})
+                Spread {{ index + 1 }} (Pages {{ index * 2 + 1 }}-{{
+                  index * 2 + 2
+                }})
               </li>
             </ul>
           </div>
@@ -495,17 +881,24 @@ const goPreview = () => router.push("/upload/preview");
 
     <div class="bottom-tools-section" @click.stop>
       <div class="tool-content-panel">
-        <!-- Фотографии внизу -->
         <div v-if="activeTool === 'photos'" class="tool-pane internal-photos">
           <div class="filter-bar">
-            <span :class="{ active: activeFilter === 'all' }" @click="activeFilter = 'all'">All photos</span>
-            <span :class="{ active: activeFilter === 'unused' }" @click="activeFilter = 'unused'">Unused</span>
+            <span
+              :class="{ active: activeFilter === 'all' }"
+              @click="activeFilter = 'all'"
+              >All photos</span
+            >
+            <span
+              :class="{ active: activeFilter === 'unused' }"
+              @click="activeFilter = 'unused'"
+              >Unused</span
+            >
           </div>
           <div class="horizontal-scroll-gallery">
-            <div 
-              v-for="(img, idx) in photos" 
-              :key="idx" 
-              class="scroll-thumb" 
+            <div
+              v-for="(img, idx) in photos"
+              :key="idx"
+              class="scroll-thumb"
               :class="{ 'selected-thumb': idx === selectedPhotoIndex }"
               @click="handleSelectPhoto(idx)"
             >
@@ -514,7 +907,6 @@ const goPreview = () => router.push("/upload/preview");
           </div>
         </div>
 
-        <!-- Шаблоны/Идеи -->
         <div v-if="activeTool === 'ideas'" class="tool-pane internal-ideas">
           <div class="horizontal-scroll-gallery">
             <div
@@ -529,52 +921,117 @@ const goPreview = () => router.push("/upload/preview");
           </div>
         </div>
 
-        <!-- Задний фон -->
         <div v-if="activeTool === 'background'" class="tool-pane internal-bg">
           <div class="color-picker-scroll">
-            <div class="color-circle" style="background: #ececec" @click="changeBackground('#ececec')"></div>
-            <div class="color-circle" style="background: #ffffff" @click="changeBackground('#ffffff')"></div>
-            <div class="color-circle" style="background: #fef08a" @click="changeBackground('#fef08a')"></div>
-            <div class="color-circle" style="background: #bfdbfe" @click="changeBackground('#bfdbfe')"></div>
-            <div class="color-circle" style="background: #bbf7d0" @click="changeBackground('#bbf7d0')"></div>
-            <div class="color-circle" style="background: #fbcfe8" @click="changeBackground('#fbcfe8')"></div>
+            <div
+              class="color-circle"
+              style="background: #ececec"
+              @click="changeBackground('#ececec')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #ffffff"
+              @click="changeBackground('#ffffff')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #fef08a"
+              @click="changeBackground('#fef08a')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #bfdbfe"
+              @click="changeBackground('#bfdbfe')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #bbf7d0"
+              @click="changeBackground('#bbf7d0')"
+            ></div>
+            <div
+              class="color-circle"
+              style="background: #fbcfe8"
+              @click="changeBackground('#fbcfe8')"
+            ></div>
           </div>
         </div>
 
-        <!-- Стикеры -->
-        <div v-if="activeTool === 'sticker'" class="tool-pane internal-stickers">
-          <div class="horizontal-scroll-gallery">
-            <div class="sticker-item">❤️</div>
-            <div class="sticker-item">✈️</div>
-            <div class="sticker-item">✨</div>
-            <div class="sticker-item">📸</div>
-            <div class="sticker-item">🌍</div>
+        <div
+          v-if="activeTool === 'sticker'"
+          class="tool-pane internal-stickers"
+        >
+          <div class="sticker-categories-tabs">
+            <button
+              v-for="(cat, idx) in stickerCategories"
+              :key="idx"
+              type="button"
+              class="sticker-cat-btn"
+              :class="{ active: activeStickerCategory === idx }"
+              @click="activeStickerCategory = idx"
+            >
+              {{ cat.name }}
+            </button>
+          </div>
+
+          <div class="horizontal-scroll-gallery stickers-grid">
+            <div
+              v-for="(item, idx) in stickerCategories[activeStickerCategory]
+                .items"
+              :key="idx"
+              class="sticker-picker-item"
+              @click="addStickerToCurrentPage(item)"
+            >
+              <template v-if="item.type === 'emoji'">
+                {{ item.value }}
+              </template>
+              <template v-else-if="item.type === 'svg'">
+                <img :src="item.value" alt="sticker" />
+              </template>
+            </div>
           </div>
         </div>
 
-        <!-- Умный режим -->
         <div v-if="activeTool === 'smart'" class="tool-pane internal-smart">
           <button class="ai-rearrange-btn" @click="generateInitialLayouts">
-            🪄 Auto-shuffle Album Layouts via AI
+            Auto-shuffle Album Layouts via AI
           </button>
         </div>
       </div>
 
-      <!-- Вкладки инструментов -->
       <nav class="editor-bottom-tabs" aria-label="Editor tools">
-        <button class="tab-btn-item" :class="{ active: activeTool === 'photos' }" @click="activeTool = 'photos'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'photos' }"
+          @click="activeTool = 'photos'"
+        >
           <img :src="galleryIcon" alt="Photos" /> <span>Photos</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'ideas' }" @click="activeTool = 'ideas'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'ideas' }"
+          @click="activeTool = 'ideas'"
+        >
           <img :src="ideasIcon" alt="Ideas" /> <span>Ideas</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'background' }" @click="activeTool = 'background'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'background' }"
+          @click="activeTool = 'background'"
+        >
           <img :src="backgroundIcon" alt="Background" /> <span>Background</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'sticker' }" @click="activeTool = 'sticker'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'sticker' }"
+          @click="activeTool = 'sticker'"
+        >
           <img :src="stickerIcon" alt="Sticker" /> <span>Sticker</span>
         </button>
-        <button class="tab-btn-item" :class="{ active: activeTool === 'smart' }" @click="activeTool = 'smart'">
+        <button
+          class="tab-btn-item"
+          :class="{ active: activeTool === 'smart' }"
+          @click="activeTool = 'smart'"
+        >
           <img :src="smartIcon" alt="Smart" /> <span>Smart</span>
         </button>
       </nav>
@@ -601,7 +1058,6 @@ const goPreview = () => router.push("/upload/preview");
   bottom: 35px;
   left: 70%;
   transform: translateX(-50%);
-  /* max-height: 200px; */
   overflow-y: auto;
   width: 339px;
   top: auto;
@@ -618,17 +1074,14 @@ const goPreview = () => router.push("/upload/preview");
   gap: 12px;
 }
 
-/* .editor-tool:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-} */
-
 /* ДИНАМИЧЕСКИЕ СЕТКИ ФОТО */
 .page-layout-grid {
   display: grid;
   gap: 6px;
   flex-grow: 1;
   margin-bottom: 12px;
+  height: 100%;
+  min-height: 0;
 }
 .layout-magazine {
   grid-template-columns: 1fr;
@@ -638,6 +1091,7 @@ const goPreview = () => router.push("/upload/preview");
 }
 .layout-collage {
   grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr 1fr;
 }
 .layout-collage .grid-photo-slot:nth-child(1) {
   grid-column: span 2;
@@ -655,11 +1109,18 @@ const goPreview = () => router.push("/upload/preview");
   border-radius: 4px;
   overflow: hidden;
   position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
 }
 .grid-photo-slot img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .empty-slot-placeholder {
   position: absolute;
@@ -750,6 +1211,8 @@ const goPreview = () => router.push("/upload/preview");
 .sticker-item {
   font-size: 26px;
   cursor: pointer;
+  padding: 4px 8px;
+  user-select: none;
 }
 .ai-rearrange-btn {
   width: 100%;
@@ -767,7 +1230,7 @@ const goPreview = () => router.push("/upload/preview");
   cursor: pointer;
 }
 .scroll-thumb.selected-thumb {
-  border-color: #6366f1; /* Красивый фиолетовый/синий цвет рамки */
+  border-color: #6366f1;
   transform: scale(1.05);
   display: flex;
   justify-content: center;
@@ -775,63 +1238,104 @@ const goPreview = () => router.push("/upload/preview");
   border-radius: var(--border-radius-circular);
   padding: 0 2px;
 }
-.grid-photo-slot {
-  cursor: pointer; /* Чтобы при наведении на пустой слот или фото было понятно, что туда можно кликнуть */
-}
 
-/*  */
-/* Находим .page-layout-grid и добавляем управление высотой */
-.page-layout-grid {
-  display: grid;
-  gap: 6px;
-  flex-grow: 1;
-  margin-bottom: 12px;
-  
-  /* ВАЖНО: заставляем сетку растягиваться на всю доступную высоту родителя */
-  height: 100%; 
-  min-height: 0; /* Предотвращает переполнение в flex/grid контейнерах */
-}
-
-/* Явно указываем сеткам, как делить строки поровну */
-.layout-grid {
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr; /* У тебя это было, отлично */
-}
-
-/* Для шаблона с 5 слотами (Moodboard) или других, если строки не были заданы */
-.layout-collage {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr 1fr; /* Добавляем автоматические равные строки */
-}
-
-/* Самое главное исправление для контейнера слота */
-.grid-photo-slot {
-  background: #e2e8f0;
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-  
-  /* ВАЖНО: слот должен занимать 100% высоты ячейки сетки */
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-
-/* Исправление для самой картинки внутри слота */
-.grid-photo-slot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Добавляем абсолютное позиционирование, чтобы картинка  */
-  /* гарантированно не ломала размеры флекс-контейнера */
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 .editor-page-side {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Или фиксированная высота страницы альбома */
+  height: 100%;
   box-sizing: border-box;
+}
+
+/* --- НОВЫЕ СТИЛИ ДЛЯ ПОДДЕРЖКИ СТИКЕРОВ --- */
+.page-content-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.absolute-sticker {
+  position: absolute;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: move;
+  user-select: none;
+  touch-action: none; /* Предотвращает системные жесты скролла */
+  z-index: 10;
+  transform-origin: center center;
+  transition: transform 0.05s linear;
+}
+
+/*  */
+/* Панель категорий стикеров */
+.sticker-categories-tabs {
+  display: flex;
+  gap: 5px;
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  overflow-x: auto;
+}
+
+.sticker-cat-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 20px;
+  padding: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.sticker-cat-btn.active {
+  background: #6366f1;
+  color: white;
+  padding: 6px 12px;
+}
+
+.stickers-grid {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  align-items: center;
+}
+
+.sticker-picker-item {
+  font-size: 28px;
+  cursor: pointer;
+  padding: 6px;
+  user-select: none;
+  transition: transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.sticker-picker-item:hover {
+  transform: scale(1.15);
+}
+
+.sticker-picker-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+/* Стилизация текстовых плашек на самом холсте */
+.absolute-sticker.text-badge {
+  font-size: 18px;
+  font-weight: bold;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  border: 1px solid #e2e8f0;
+  font-family: 'Arial', sans-serif;
+  color: #1e293b;
 }
 </style>

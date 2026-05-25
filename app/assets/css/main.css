@@ -1703,11 +1703,12 @@ textarea {
   /* margin: clamp(50px, 10vh, 100px) auto; */
   margin: 75px auto;
   aspect-ratio: 16 / 13.5;
+  position: relative;
 }
 .editor-page .editor-middle-container .editor-spread .editor-page-side {
   flex: 1;
   background: var(--bg-color-card);
-  position: relative;
+  /* position: relative; */
   padding: 12px;
   display: flex;
   flex-direction: column;
