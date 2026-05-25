@@ -33,6 +33,20 @@ import {
 
 const router = useRouter();
 
+// --- Добавьте в блок СОСТОЯНИЕ ДАННЫХ ---
+const activeStickerId = ref<string | null>(null);
+// Функция для выделения стикера (чтобы на телефоне открывалось меню управления)
+function selectSticker(stickerId: string) {
+  activeStickerId.value =
+    activeStickerId.value === stickerId ? null : stickerId;
+}
+// Функции изменения масштаба через кнопки (для мобилок)
+function zoomSticker(sticker: StickerState, direction: "in" | "out") {
+  const delta = direction === "in" ? 0.2 : -0.2;
+  sticker.scale = Math.max(0.5, Math.min(3, sticker.scale + delta));
+  saveToHistory();
+}
+
 // --- СОСТОЯНИЕ ДАННЫХ ---
 const photos = ref<UploadedPhoto[]>([]);
 const totalPages = ref(10);
@@ -378,7 +392,7 @@ const stickerCategories = [
       { type: "emoji", value: "🤘" },
       { type: "emoji", value: "🤙" },
       { type: "emoji", value: "🖐️" },
-    ]
+    ],
   },
   {
     name: "🍕",
@@ -407,7 +421,7 @@ const stickerCategories = [
       { type: "emoji", value: "🍓" },
       { type: "emoji", value: "🌽" },
       { type: "emoji", value: "🍆" },
-    ]
+    ],
   },
   {
     name: "❤️",
@@ -775,28 +789,69 @@ const goPreview = () => router.push("/upload/preview");
           <div
             v-for="sticker in currentSpread.stickers"
             :key="sticker.id"
-            class="absolute-sticker"
-            :class="{ 'text-badge': sticker.value.length > 4 }"
+            class="absolute-sticker-wrapper"
             :style="{
               left: sticker.x + '%',
               top: sticker.y + '%',
               transform: `scale(${sticker.scale}) rotate(${sticker.rotation}deg)`,
             }"
+            :class="{ 'is-active-sticker': activeStickerId === sticker.id }"
             @mousedown="startDrag($event, sticker)"
             @touchstart="startDrag($event, sticker)"
             @wheel="handleStickerWheel($event, sticker)"
-            @dblclick="rotateSticker(sticker)"
+            @click.stop="selectSticker(sticker.id)"
             @contextmenu.prevent="deleteSticker(currentSpread, sticker.id)"
           >
-            <template v-if="sticker.type === 'emoji'">
-              {{ sticker.value }}
-            </template>
-            <template v-else-if="sticker.type === 'svg'">
-              <img
-                :src="sticker.value"
-                style="width: 100%; height: 100%; object-fit: contain"
-              />
-            </template>
+            <div
+              v-if="activeStickerId === sticker.id"
+              class="sticker-controls"
+              @click.stop
+            >
+              <button
+                type="button"
+                class="ctrl-btn"
+                @click="zoomSticker(sticker, 'in')"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                class="ctrl-btn"
+                @click="zoomSticker(sticker, 'out')"
+              >
+                -
+              </button>
+              <button
+                type="button"
+                class="ctrl-btn"
+                @click="rotateSticker(sticker)"
+              >
+                🔄
+              </button>
+              <button
+                type="button"
+                class="ctrl-btn danger"
+                @click="deleteSticker(currentSpread, sticker.id)"
+              >
+                ❌
+              </button>
+            </div>
+
+            <div
+              class="sticker-body"
+              :class="{ 'text-badge': sticker.value.length > 4 }"
+            >
+              <template v-if="sticker.type === 'emoji'">
+                {{ sticker.value }}
+              </template>
+              <template v-else-if="sticker.type === 'svg'">
+                <img
+                  :src="sticker.value"
+                  style="width: 100%; height: 100%; object-fit: contain"
+                  alt="sticker"
+                />
+              </template>
+            </div>
           </div>
 
           <template v-if="currentSpreadIndex === 0">
@@ -1333,9 +1388,64 @@ const goPreview = () => router.push("/upload/preview");
   background: white;
   padding: 6px 12px;
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   border: 1px solid #e2e8f0;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   color: #1e293b;
+}
+
+.absolute-sticker-wrapper {
+  position: absolute;
+  cursor: grab;
+  touch-action: none; /* Важно для мобилок: отключает стандартный скролл браузера при перетаскивании */
+  user-select: none;
+}
+
+.absolute-sticker-wrapper:active {
+  cursor: grabbing;
+}
+
+/* Рамка вокруг активного стикера */
+.is-active-sticker .sticker-body {
+  outline: 2px dashed #ff4d35;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Контейнер с кнопками управления */
+.sticker-controls {
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: white;
+  padding: 4px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.ctrl-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ctrl-btn:active {
+  background: #e2e8f0;
+}
+
+.ctrl-btn.danger {
+  background: #fee2e2;
+  color: #ef4444;
 }
 </style>
