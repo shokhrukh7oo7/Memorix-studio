@@ -159,7 +159,7 @@ export function clearBookDraft() {
   localStorage.removeItem(BOOK_DRAFT_KEY);
 }
 
-/* Полная очистка временных данных редактора 
+/* Полная очистка временных данных редактора
  * (Оставляем корзину CART_KEY и заказы ACTIVE_ORDERS_KEY, чтобы не злить пользователя)
  */
 export function clearEditorSessionData() {
