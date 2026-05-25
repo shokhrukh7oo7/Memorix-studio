@@ -147,3 +147,24 @@ export function prependActiveOrder(order: StoredOrder) {
   cur.unshift(order);
   localStorage.setItem(ACTIVE_ORDERS_KEY, JSON.stringify(cur));
 }
+// ========================================================================================
+// Очистка после обновнение
+export function clearUploadedPhotos() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(UPLOADED_PHOTOS_KEY);
+}
+
+export function clearBookDraft() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(BOOK_DRAFT_KEY);
+}
+
+/* Полная очистка временных данных редактора 
+ * (Оставляем корзину CART_KEY и заказы ACTIVE_ORDERS_KEY, чтобы не злить пользователя)
+ */
+export function clearEditorSessionData() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(UPLOADED_PHOTOS_KEY);
+  localStorage.removeItem(BOOK_DRAFT_KEY);
+  localStorage.removeItem(PENDING_ORDER_KEY);
+}
