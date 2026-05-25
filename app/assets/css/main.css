@@ -460,8 +460,8 @@ textarea {
 }
 
 .best-seller-container .best-seller-image-wrapper {
-  border: 1px solid var(--temp-border-color);
-  padding: 15px;
+  /* border: 1px solid var(--temp-border-color); */
+  /* padding: 15px; */
   max-width: 175px;
   height: auto;
   border-radius: var(--border-radius-default);

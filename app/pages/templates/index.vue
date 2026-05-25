@@ -14,9 +14,16 @@ const goBack = () => {
 };
 
 // Импорт изображений для карточек
-import best1 from "~/assets/images/swiper/bestSeller-1.png";
-import best2 from "~/assets/images/swiper/bestSeller-2.png";
-import best3 from "~/assets/images/swiper/bestSeller-3.png";
+import book1 from "~/assets/images/swiper/book-1.png";
+import book2 from "~/assets/images/swiper/book-2.png";
+import book3 from "~/assets/images/swiper/book-3.png";
+import book4 from "~/assets/images/swiper/book-4.png";
+import book5 from "~/assets/images/swiper/book-5.png";
+import book6 from "~/assets/images/swiper/book-6.png";
+
+// import best1 from "~/assets/images/swiper/bestSeller-1.png";
+// import best2 from "~/assets/images/swiper/bestSeller-2.png";
+// import best3 from "~/assets/images/swiper/bestSeller-3.png";
 import arrowLeft from "~/assets/images/arrow-left.svg";
 import searchIcon from "~/assets/images/search.svg";
 
@@ -37,28 +44,28 @@ const cards = ref<BookCardType[]>([
     title: "Always you",
     colorName: "Burgundy",
     description: "Most popular template for your travel book",
-    images: [best1, best2, best3],
+    images: [book1, book2, book3],
   },
   {
     id: 2,
     title: "Always you",
     colorName: "Burgundy",
     description: "Most popular template for your travel book",
-    images: [best2, best3, best1],
+    images: [book4, book5, book6],
   },
   {
     id: 3,
     title: "Always you",
     colorName: "Burgundy",
     description: "Most popular template for your travel book",
-    images: [best3, best2, best1],
+    images: [book3, book2, book1],
   },
   {
     id: 4,
     title: "Always you",
     colorName: "Burgundy",
     description: "Most popular template for your travel book",
-    images: [best1, best2, best3],
+    images: [book4, book5, book6],
   },
 ]);
 
