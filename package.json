@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/i18n": "^10.4.0",
     "@pqina/pintura": "^8.97.1",
     "maska": "^1.5.2",
     "nuxt": "^4.4.2",
