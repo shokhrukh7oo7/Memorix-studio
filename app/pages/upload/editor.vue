@@ -23,7 +23,7 @@ import galleryIcon from "~/assets/images/photos.svg";
 import ideasIcon from "~/assets/images/ideas.svg";
 import backgroundIcon from "~/assets/images/background.svg";
 import stickerIcon from "~/assets/images/sticker.svg";
-import smartIcon from "~/assets/images/smart.svg";
+// import smartIcon from "~/assets/images/smart.svg";
 
 import {
   loadUploadedPhotos,
@@ -1047,11 +1047,11 @@ const goPreview = () => router.push("/upload/preview");
           </div>
         </div>
 
-        <div v-if="activeTool === 'smart'" class="tool-pane internal-smart">
+        <!-- <div v-if="activeTool === 'smart'" class="tool-pane internal-smart">
           <button class="ai-rearrange-btn" @click="generateInitialLayouts">
             Auto-shuffle Album Layouts via AI
           </button>
-        </div>
+        </div> -->
       </div>
 
       <nav class="editor-bottom-tabs" aria-label="Editor tools">
@@ -1083,13 +1083,13 @@ const goPreview = () => router.push("/upload/preview");
         >
           <img :src="stickerIcon" alt="Sticker" /> <span>Sticker</span>
         </button>
-        <button
+        <!-- <button
           class="tab-btn-item"
           :class="{ active: activeTool === 'smart' }"
           @click="activeTool = 'smart'"
         >
           <img :src="smartIcon" alt="Smart" /> <span>Smart</span>
-        </button>
+        </button> -->
       </nav>
 
       <div class="preview-design-btn-wrapper">
