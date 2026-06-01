@@ -724,7 +724,8 @@ const goPreview = () => router.push("/upload/preview");
                 :class="currentSpread.leftPage.layoutClass"
               >
                 <div
-                  v-for="(photoIdx, pIdx) in currentSpread.leftPage.photoIndices"
+                  v-for="(photoIdx, pIdx) in currentSpread.leftPage
+                    .photoIndices"
                   :key="pIdx"
                   class="grid-photo-slot"
                   @click="handleSlotClick('left', pIdx)"
