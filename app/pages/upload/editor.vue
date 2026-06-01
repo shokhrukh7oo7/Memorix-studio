@@ -33,14 +33,14 @@ import {
 
 const router = useRouter();
 
-// --- Добавьте в блок СОСТОЯНИЕ ДАННЫХ ---
+// --- СОСТОЯНИЕ СТИКЕРОВ ---
 const activeStickerId = ref<string | null>(null);
-// Функция для выделения стикера (чтобы на телефоне открывалось меню управления)
+
 function selectSticker(stickerId: string) {
   activeStickerId.value =
     activeStickerId.value === stickerId ? null : stickerId;
 }
-// Функции изменения масштаба через кнопки (для мобилок)
+
 function zoomSticker(sticker: StickerState, direction: "in" | "out") {
   const delta = direction === "in" ? 0.2 : -0.2;
   sticker.scale = Math.max(0.5, Math.min(3, sticker.scale + delta));
@@ -51,8 +51,6 @@ function zoomSticker(sticker: StickerState, direction: "in" | "out") {
 const photos = ref<UploadedPhoto[]>([]);
 const totalPages = ref(10);
 const currentSpreadIndex = ref(0);
-
-// Индекс выбранной фотографии в нижней галерее (-1, если ничего не выбрано)
 const selectedPhotoIndex = ref<number>(-1);
 
 const layoutStyles = [
@@ -72,8 +70,8 @@ interface StickerState {
   type: "emoji" | "svg" | "image";
   value: string;
   char: string;
-  x: number; // Процентное смещение (0-100) относительно родительской страницы
-  y: number; // Процентное смещение (0-100)
+  x: number;
+  y: number;
   scale: number;
   rotation: number;
 }
@@ -85,13 +83,14 @@ interface PageState {
   photoIndices: number[];
   textTitle: string;
   textContent: string;
-  stickers?: StickerState[]; // Опциональный массив стикеров для страницы
+  stickers?: StickerState[];
 }
 
 interface SpreadState {
   id: number;
   leftPage: PageState | null;
   rightPage: PageState;
+  stickers?: StickerState[];
 }
 
 const bookSpreads = ref<SpreadState[]>([]);
@@ -201,6 +200,7 @@ function generateInitialLayouts() {
       textContent: "Enter text",
       stickers: [],
     },
+    stickers: [],
   });
 
   let currentPageNum = 2;
@@ -254,6 +254,7 @@ function generateInitialLayouts() {
         stickers: [],
       },
       rightPage: rightPageData,
+      stickers: [],
     });
 
     currentPageNum += 2;
@@ -276,15 +277,12 @@ function handleSlotClick(pageSide: "left" | "right", slotIndex: number) {
     pageSide === "left" ? targetSpread.leftPage : targetSpread.rightPage;
   if (!targetPage) return;
 
-  // ЕСЛИ СНИЗУ ВЫБРАНА ФОТОГРАФИЯ — вставляем её в слот
   if (selectedPhotoIndex.value !== -1) {
     targetPage.photoIndices[slotIndex] = selectedPhotoIndex.value;
     saveToHistory();
-    selectedPhotoIndex.value = -1; // Сбрасываем выделение в галерее
-  }
-  // ЕСЛИ СНИЗУ НИЧЕГО НЕ ВЫБРАНО И КЛИКНУЛИ ПО ЗАНЯТОМУ СЛОТУ — очищаем его
-  else if (targetPage.photoIndices[slotIndex] !== -1) {
-    targetPage.photoIndices[slotIndex] = -1; // Возвращаем пустой слот (+)
+    selectedPhotoIndex.value = -1;
+  } else if (targetPage.photoIndices[slotIndex] !== -1) {
+    targetPage.photoIndices[slotIndex] = -1;
     saveToHistory();
   }
 }
@@ -313,26 +311,36 @@ function changeBackground(color: string) {
 }
 
 // Применение стиля/сетки к текущей странице книги
+// Applies to BOTH left and right pages for all spreads except spread 0 (pages 1-2 cover)
 function applyLayoutToRightPage(styleClass: string, styleName: string) {
   const targetSpread = bookSpreads.value[currentSpreadIndex.value];
   if (!targetSpread) return;
 
-  targetSpread.rightPage.layoutClass = styleClass;
-  targetSpread.rightPage.layoutTitle = styleName;
-
-  // Корректируем длину массива фото-индексов под новую сетку
   const currentStyle = layoutStyles.find((s) => s.class === styleClass);
-  if (currentStyle) {
-    const currentLength = targetSpread.rightPage.photoIndices.length;
-    if (currentLength < currentStyle.slots) {
-      while (targetSpread.rightPage.photoIndices.length < currentStyle.slots) {
-        targetSpread.rightPage.photoIndices.push(-1);
+
+  function applyToPage(page: PageState) {
+    page.layoutClass = styleClass;
+    page.layoutTitle = styleName;
+    if (currentStyle) {
+      const currentLength = page.photoIndices.length;
+      if (currentLength < currentStyle.slots) {
+        while (page.photoIndices.length < currentStyle.slots) {
+          page.photoIndices.push(-1);
+        }
+      } else if (currentLength > currentStyle.slots) {
+        page.photoIndices = page.photoIndices.slice(0, currentStyle.slots);
       }
-    } else if (currentLength > currentStyle.slots) {
-      targetSpread.rightPage.photoIndices =
-        targetSpread.rightPage.photoIndices.slice(0, currentStyle.slots);
     }
   }
+
+  // Always apply to right page
+  applyToPage(targetSpread.rightPage);
+
+  // Apply to left page too, but skip spread 0 (the cover — pages 1-2)
+  if (currentSpreadIndex.value > 0 && targetSpread.leftPage) {
+    applyToPage(targetSpread.leftPage);
+  }
+
   saveToHistory();
 }
 
@@ -463,10 +471,8 @@ const stickerCategories = [
   },
 ];
 
-// Состояние активной категории в панели
 const activeStickerCategory = ref(0);
 
-// Добавить стикер на активную (правую по умолчанию или левую если доступна) страницу
 function addStickerToCurrentPage(stickerItem: { type: string; value: string }) {
   const targetSpread = bookSpreads.value[currentSpreadIndex.value];
   if (!targetSpread) return;
@@ -477,7 +483,8 @@ function addStickerToCurrentPage(stickerItem: { type: string; value: string }) {
     id: "sticker_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
     type: stickerItem.type as "emoji" | "svg" | "image",
     value: stickerItem.value,
-    x: 40, // Начальная позиция ближе к центру
+    char: stickerItem.value,
+    x: 40,
     y: 35,
     scale: 1,
     rotation: 0,
@@ -486,20 +493,17 @@ function addStickerToCurrentPage(stickerItem: { type: string; value: string }) {
   saveToHistory();
 }
 
-// Удалить стикер (Right Click)
-function deleteSticker(page: PageState, stickerId: string) {
+function deleteSticker(page: PageState | SpreadState, stickerId: string) {
   if (!page.stickers) return;
   page.stickers = page.stickers.filter((s) => s.id !== stickerId);
   saveToHistory();
 }
 
-// Вращение стикера (Double Click) - поворот на 45 градусов при каждом вызове
 function rotateSticker(sticker: StickerState) {
   sticker.rotation = (sticker.rotation + 45) % 360;
   saveToHistory();
 }
 
-// Масштабирование стикера колесиком мыши (Mouse wheel)
 function handleStickerWheel(event: WheelEvent, sticker: StickerState) {
   event.preventDefault();
   const delta = event.deltaY < 0 ? 0.1 : -0.1;
@@ -518,16 +522,13 @@ let dragContainer: HTMLElement | null = null;
 function startDrag(
   event: MouseEvent | TouchEvent,
   sticker: StickerState,
-  pageClass: string,
+  pageClass?: string,
 ) {
-  // Игнорируем правый клик для начала перемещения, чтобы работал контекстный сброс
   if (event instanceof MouseEvent && event.button !== 0) return;
 
   activeDragSticker = sticker;
 
-  // Ищем родительский контейнер страницы
   const targetElement = event.currentTarget as HTMLElement;
-  // dragContainer = targetElement.closest(".editor-page-side") as HTMLElement;
   dragContainer = targetElement.closest(".editor-spread") as HTMLElement;
 
   const clientX =
@@ -553,7 +554,6 @@ function onDragging(event: MouseEvent | TouchEvent) {
   if (!activeDragSticker || !dragContainer) return;
 
   if (event instanceof TouchEvent) {
-    // Предотвращаем скролл экрана на мобильных во время перетаскивания
     event.preventDefault();
   }
 
@@ -565,7 +565,6 @@ function onDragging(event: MouseEvent | TouchEvent) {
   const deltaX = clientX - startX;
   const deltaY = clientY - startY;
 
-  // Конвертируем пиксели движения в проценты относительно размера страницы
   const containerWidth = dragContainer.clientWidth;
   const containerHeight = dragContainer.clientHeight;
 
@@ -704,6 +703,7 @@ const goPreview = () => router.push("/upload/preview");
       </div>
 
       <div class="editor-spread" v-if="currentSpread">
+        <!-- LEFT PAGE -->
         <div
           class="editor-page-side page-left"
           :class="{ 'fixed-cover-style': currentSpreadIndex === 0 }"
@@ -724,8 +724,7 @@ const goPreview = () => router.push("/upload/preview");
                 :class="currentSpread.leftPage.layoutClass"
               >
                 <div
-                  v-for="(photoIdx, pIdx) in currentSpread.leftPage
-                    .photoIndices"
+                  v-for="(photoIdx, pIdx) in currentSpread.leftPage.photoIndices"
                   :key="pIdx"
                   class="grid-photo-slot"
                   @click="handleSlotClick('left', pIdx)"
@@ -763,6 +762,7 @@ const goPreview = () => router.push("/upload/preview");
           </template>
         </div>
 
+        <!-- RIGHT PAGE -->
         <div
           class="editor-page-side page-right"
           :style="{ backgroundColor: selectedBackground }"
@@ -786,6 +786,7 @@ const goPreview = () => router.push("/upload/preview");
               </div>
             </div>
           </div>
+
           <div
             v-for="sticker in currentSpread.stickers"
             :key="sticker.id"
@@ -1301,7 +1302,7 @@ const goPreview = () => router.push("/upload/preview");
   box-sizing: border-box;
 }
 
-/* --- НОВЫЕ СТИЛИ ДЛЯ ПОДДЕРЖКИ СТИКЕРОВ --- */
+/* --- СТИЛИ ДЛЯ ПОДДЕРЖКИ СТИКЕРОВ --- */
 .page-content-wrapper {
   position: relative;
   width: 100%;
@@ -1321,13 +1322,12 @@ const goPreview = () => router.push("/upload/preview");
   align-items: center;
   cursor: move;
   user-select: none;
-  touch-action: none; /* Предотвращает системные жесты скролла */
+  touch-action: none;
   z-index: 10;
   transform-origin: center center;
   transition: transform 0.05s linear;
 }
 
-/*  */
 /* Панель категорий стикеров */
 .sticker-categories-tabs {
   display: flex;
@@ -1397,7 +1397,7 @@ const goPreview = () => router.push("/upload/preview");
 .absolute-sticker-wrapper {
   position: absolute;
   cursor: grab;
-  touch-action: none; /* Важно для мобилок: отключает стандартный скролл браузера при перетаскивании */
+  touch-action: none;
   user-select: none;
 }
 
