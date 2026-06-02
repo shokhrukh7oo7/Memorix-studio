@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     locales: [
       { code: 'ru', name: 'Русский', file: 'ru.json' },
       { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'uz', name: 'Ozbek', file: 'uz.json' }
     ],
     defaultLocale: 'ru',
     langDir: './lang' // папка, где лежат ваши файлы переводов
