@@ -317,6 +317,8 @@ textarea {
 .template-wrapper .template-container .template-content-wrapper {
   display: flex;
   flex-direction: column;
+  justify-content: start;
+  align-items: start;
   gap: 8px;
 }
 .template-wrapper .template-container .template-content-wrapper h1 {
@@ -333,6 +335,7 @@ textarea {
   font-size: 13px;
   padding: 8px 10px;
   font-family: var(--font-jet);
+  width: auto;
 }
 /* ==================================================== */
 /* swiper section start */

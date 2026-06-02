@@ -101,16 +101,15 @@ const templateCard = [
       navigateTo("/templates");
     },
   },
-  {
-    id: 2,
-    image: tempCard2,
-    text: "Start from scratch",
-    buttonText: "Upload images",
-    action: () => {
-      navigateTo("/upload");
-      // тут потом открываешь file input
-    },
-  },
+  // {
+  //   id: 2,
+  //   image: tempCard2,
+  //   text: "Start from scratch",
+  //   buttonText: "Upload images",
+  //   action: () => {
+  //     navigateTo("/upload");
+  //   },
+  // },
 ];
 
 const categorySlides = [
