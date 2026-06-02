@@ -23,7 +23,7 @@ export default defineNuxtConfig({
       { code: 'uz', name: 'Ozbek', file: 'uz.json' }
     ],
     defaultLocale: 'ru',
-    langDir: './lang' // папка, где лежат ваши файлы переводов
+    langDir: './lang'
   },
 
   routeRules: {

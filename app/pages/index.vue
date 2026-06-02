@@ -101,15 +101,6 @@ const templateCard = [
       navigateTo("/templates");
     },
   },
-  // {
-  //   id: 2,
-  //   image: tempCard2,
-  //   text: "Start from scratch",
-  //   buttonText: "Upload images",
-  //   action: () => {
-  //     navigateTo("/upload");
-  //   },
-  // },
 ];
 
 const categorySlides = [
@@ -450,7 +441,6 @@ const goTemplate = () => {
     </div>
   </div>
   <!-- faq section end -->
-
 </template>
 
 <style scoped></style>
