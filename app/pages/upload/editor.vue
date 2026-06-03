@@ -591,7 +591,15 @@ function stopDrag(event: MouseEvent | TouchEvent) {
 
 const goBack = () => router.push("/upload/upload");
 const goOrder = () => router.push("/orders");
-const goPreview = () => router.push("/upload/preview");
+// const goPreview = () => router.push("/upload/preview");
+const goPreview = () => {
+  const firstSpread = bookSpreads.value[0];
+  const textTitle = firstSpread?.rightPage?.textTitle ?? "";
+  const textContent = firstSpread?.rightPage?.textContent ?? "";
+  sessionStorage.setItem("previewTextTitle", textTitle);
+  sessionStorage.setItem("previewTextContent", textContent);
+  router.push("/upload/preview");
+};
 </script>
 
 <template>

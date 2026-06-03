@@ -24,6 +24,9 @@ const activePhoto = computed(() => photos.value[activeIndex.value] ?? null);
 
 const bookPages = computed(() => draft.value?.bookPages ?? 20);
 
+const previewTextTitle = ref("");
+const previewTextContent = ref("");
+
 onMounted(() => {
   photos.value = loadUploadedPhotos();
   if (!photos.value.length) {
@@ -31,6 +34,8 @@ onMounted(() => {
     return;
   }
   activeIndex.value = 0;
+  previewTextTitle.value = sessionStorage.getItem("previewTextTitle") ?? "";
+  previewTextContent.value = sessionStorage.getItem("previewTextContent") ?? "";
 });
 
 const goBack = () => {
@@ -86,8 +91,20 @@ const addToCart = () => {
         </div>
         <div class="preview-spread-right">
           <img :src="String(activePhoto.url)" :alt="activePhoto.name" />
-          <span class="preview-cap">Title</span>
-          <span class="preview-cap muted">Enter text</span>
+
+          <span v-if="currentSpread?.rightPage?.textTitle" class="preview-cap">
+            {{ currentSpread?.rightPage?.textTitle }}
+          </span>
+
+          <span
+            v-if="currentSpread?.right?.textContent"
+            class="preview-cap muted"
+          >
+            {{ currentSpread?.rightPage?.textContent }}
+          </span>
+
+          <!-- <span class="preview-cap">Title</span>
+          <span class="preview-cap muted">Enter text</span> -->
         </div>
       </div>
     </div>
