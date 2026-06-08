@@ -6,6 +6,7 @@ import arrowLeft from "~/assets/images/arrow-left.svg";
 import giftImage from "~/assets/images/gift.png";
 import {
   loadCart,
+  loadUploadedPhotos,
   clearCart,
   prependActiveOrder,
   savePendingOrder,
@@ -22,9 +23,17 @@ const qty = ref(1);
 const giftWrapped = ref(true);
 const showPayModal = ref(false);
 const agreedLowQuality = ref(false);
+const uploadedPhotos = ref<{ url: string | ArrayBuffer | null }[]>([]);
 
 onMounted(() => {
   cart.value = loadCart();
+  uploadedPhotos.value = loadUploadedPhotos();
+});
+
+const coverSrc = computed(() => {
+  if (line.value?.coverDataUrl) return line.value.coverDataUrl;
+  const first = uploadedPhotos.value[0];
+  return first ? String(first.url) : "";
 });
 
 const line = computed(() => cart.value[0] ?? null);
@@ -57,19 +66,49 @@ const confirmCheckout = () => {
 
   const orderId = `MX-${Date.now().toString(36).toUpperCase().slice(-10)}`;
 
-  prependActiveOrder({
-    image: line.value.coverDataUrl,
-    title: line.value.title,
-    status: "In review",
-    price: line.value.newPrice,
-  });
+  // prependActiveOrder({
+  //   image: coverSrc.value,
+  //   title: line.value.title,
+  //   status: "In review",
+  //   price: line.value.newPrice,
+  // });
+  try {
+    prependActiveOrder({
+      image: coverSrc.value,
+      title: line.value.title,
+      status: "In review",
+      price: line.value.newPrice,
+    });
+  } catch {
+    prependActiveOrder({
+      image: "",
+      title: line.value.title,
+      status: "In review",
+      price: line.value.newPrice,
+    });
+  }
 
-  savePendingOrder({
-    coverDataUrl: line.value.coverDataUrl,
-    photoCount: line.value.photoCount,
-    title: line.value.title,
-    orderId,
-  });
+  // savePendingOrder({
+  //   coverDataUrl: coverSrc.value,
+  //   photoCount: line.value.photoCount,
+  //   title: line.value.title,
+  //   orderId,
+  // });
+  try {
+    savePendingOrder({
+      coverDataUrl: coverSrc.value,
+      photoCount: line.value.photoCount,
+      title: line.value.title,
+      orderId,
+    });
+  } catch {
+    savePendingOrder({
+      coverDataUrl: "",
+      photoCount: line.value.photoCount,
+      title: line.value.title,
+      orderId,
+    });
+  }
 
   clearCart();
   cart.value = [];
@@ -97,7 +136,7 @@ const bookDraft = computed(() => loadBookDraft());
       <div class="cart-card">
         <div class="cart-card-row">
           <div class="cart-thumb">
-            <img :src="line.coverDataUrl" alt="" />
+            <img :src="coverSrc" alt="" />
           </div>
           <div class="cart-card-body">
             <div class="cart-card-body-content">

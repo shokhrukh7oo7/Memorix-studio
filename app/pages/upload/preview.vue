@@ -61,7 +61,13 @@ const addToCart = () => {
     newPrice: "$32.99",
   };
 
-  saveCart([line]);
+  // saveCart([line]);
+  try {
+    saveCart([line]);
+  } catch {
+    // localStorage quota exceeded — save without the large cover image
+    saveCart([{ ...line, coverDataUrl: "" }]);
+  }
   router.push("/cart");
 };
 </script>
