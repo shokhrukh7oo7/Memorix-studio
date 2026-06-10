@@ -25,33 +25,32 @@ const openDetails = (card: BookCardType) => {
 const bestSellersSlides = ref<BookCardType[]>([
   {
     id: 1,
-    title: "Always you",
+    title: "Travel Vibes",
     colorName: "Burgundy",
-    description: "Most popular template for your travel book",
+    description: "Perfect template for adventure and travel memories",
     images: [bestSeller1, bestSeller2, bestSeller3],
   },
   {
     id: 2,
-    title: "Always you",
-    colorName: "Burgundy",
-    description: "Most popular template for your travel book",
-    images: [bestSeller2, bestSeller3, bestSeller1],
+    title: "Love Story",
+    colorName: "Rose Pink",
+    description: "Romantic style for your most special moments",
+    images: [bestSeller4, bestSeller2, bestSeller1],
   },
   {
     id: 3,
-    title: "Always you",
-    colorName: "Burgundy",
-    description: "Most popular template for your travel book",
-    images: [bestSeller3, bestSeller2, bestSeller1],
+    title: "Classic Memories",
+    colorName: "Navy Blue",
+    description: "Timeless and elegant design for any occasion",
+    images: [book1, book2, book3],
   },
   {
     id: 4,
-    title: "Always you",
-    colorName: "Burgundy",
-    description: "Most popular template for your travel book",
-    images: [bestSeller1, bestSeller2, bestSeller3],
+    title: "Celebration",
+    colorName: "Golden",
+    description: "Vibrant and festive design for big life events",
+    images: [book4, book5, book6],
   },
-  // ... другие карточки
 ]);
 
 // 8 марта (год можно менять динамически)
@@ -79,6 +78,14 @@ import country4 from "~/assets/images/swiper/country-4.png";
 import bestSeller1 from "~/assets/images/swiper/bestSeller-1.png";
 import bestSeller2 from "~/assets/images/swiper/bestSeller-2.png";
 import bestSeller3 from "~/assets/images/swiper/bestSeller-3.png";
+import bestSeller4 from "~/assets/images/swiper/bestSeller-4.png";
+
+import book1 from "~/assets/images/swiper/book-1.png";
+import book2 from "~/assets/images/swiper/book-2.png";
+import book3 from "~/assets/images/swiper/book-3.png";
+import book4 from "~/assets/images/swiper/book-4.png";
+import book5 from "~/assets/images/swiper/book-5.png";
+import book6 from "~/assets/images/swiper/book-6.png";
 
 import st1 from "~/assets/images/swiper/st-1.png";
 import st2 from "~/assets/images/swiper/st-2.png";

@@ -93,6 +93,11 @@ const close = () => emit("close");
                 </div>
               </div>
 
+              <p class="customize-hint">
+                You can customize this template in the editor using
+                <strong>Ideas</strong> &amp; <strong>Background</strong> tabs
+              </p>
+
               <button class="details-submit-btn" @click="chooseTemplate">
                 Choose template
               </button>
@@ -239,6 +244,23 @@ const close = () => emit("close");
 .pages-selector .chips button.active {
   background-color: var(--btn-color);
   color: var(--white-color);
+}
+
+.customize-hint {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: var(--font-work);
+  color: var(--black-grey-color);
+  line-height: 140%;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  border-left: 3px solid var(--btn-color);
+}
+
+.customize-hint strong {
+  color: var(--black-color);
 }
 
 .details-submit-btn {
