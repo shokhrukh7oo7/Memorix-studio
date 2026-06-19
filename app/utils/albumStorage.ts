@@ -25,6 +25,9 @@ export interface BookDraft {
   bookPages: number;
   templateTitle: string;
   colorName: string;
+  templateId: string | null;
+  coverImage?: string;
+  albumId?: string;
 }
 
 export interface CartLine {

@@ -1,29 +1,20 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import BookCard from "~/components/ui/BookCard.vue";
 import DetailSheet from "~/components/ui/DetailSheet.vue";
 import BaseAccordion from "~/components/ui/BaseAccordion.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import { useRouter } from "#app";
 import type { BookCard as BookCardType } from "~/types";
+import { useContent, type ApiTemplate } from "~/composables/useContent";
 
 const router = useRouter();
+const { getTemplates } = useContent();
 
 const goBack = () => {
   router.back();
 };
 
-// Импорт изображений для карточек
-import book1 from "~/assets/images/swiper/book-1.png";
-import book2 from "~/assets/images/swiper/book-2.png";
-import book3 from "~/assets/images/swiper/book-3.png";
-import book4 from "~/assets/images/swiper/book-4.png";
-import book5 from "~/assets/images/swiper/book-5.png";
-import book6 from "~/assets/images/swiper/book-6.png";
-
-// import best1 from "~/assets/images/swiper/bestSeller-1.png";
-// import best2 from "~/assets/images/swiper/bestSeller-2.png";
-// import best3 from "~/assets/images/swiper/bestSeller-3.png";
 import arrowLeft from "~/assets/images/arrow-left.svg";
 import searchIcon from "~/assets/images/search.svg";
 
@@ -37,62 +28,55 @@ const activeTab = ref<TabName>("Popular");
 const isSheetOpen = ref(false);
 const selectedCard = ref<BookCardType | null>(null);
 
-// Данные для таба "Popular"
-const cards = ref<BookCardType[]>([
-  {
-    id: 1,
-    title: "Travel Vibes",
-    colorName: "Burgundy",
-    description: "Perfect template for adventure and travel memories",
-    images: [book1, book2, book3],
-  },
-  {
-    id: 2,
-    title: "Love Story",
-    colorName: "Rose Pink",
-    description: "Romantic style for your most special moments",
-    images: [book4, book5, book6],
-  },
-  {
-    id: 3,
-    title: "Classic Memories",
-    colorName: "Navy Blue",
-    description: "Timeless and elegant design for any occasion",
-    images: [book2, book4, book6],
-  },
-  {
-    id: 4,
-    title: "Celebration",
-    colorName: "Golden",
-    description: "Vibrant and festive design for big life events",
-    images: [book5, book3, book1],
-  },
-]);
+// Все шаблоны из API
+const allTemplates = ref<ApiTemplate[]>([]);
 
-// Данные для таба "Categories" (Аккордеон)
-const accordionData = [
-  {
-    title: "Travel",
-    content: ["Kazakhstan", "Turkey", "Egypt", "Thailand", "Vietnam", "China"],
-  },
-  {
-    title: "Family",
-    content: "Detailed guide on how to manage your books...",
-  },
-  {
-    title: "Events",
-    content: ["Feature 1", "Feature 2", "Feature 3"],
-  }, // Пример со списком
-  {
-    title: "Holidays",
-    content: "We offer various flexible plans for everyone.",
-  },
-];
+const toCard = (t: ApiTemplate): BookCardType => ({
+  id: t.id,
+  title: t.title,
+  colorName: t.colorName,
+  description: t.description,
+  images: t.images,
+  pageOptions: t.pageOptions,
+});
+
+// Popular tab — qidiruv bo'yicha filtrlanadi
+const cards = computed<BookCardType[]>(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  const list = allTemplates.value;
+  const filtered = q
+    ? list.filter((t) => t.title.toLowerCase().includes(q))
+    : list;
+  return filtered.map(toCard);
+});
+
+// Categories tab — kategoriyalar bo'yicha guruhlangan akkordeon (qidiruv bo'yicha filtrlanadi)
+const accordionData = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  const groups = new Map<string, string[]>();
+  for (const t of allTemplates.value) {
+    const cat = t.category?.name ?? "Boshqa";
+    const matches =
+      !q || t.title.toLowerCase().includes(q) || cat.toLowerCase().includes(q);
+    if (!matches) continue;
+    if (!groups.has(cat)) groups.set(cat, []);
+    groups.get(cat)!.push(t.title);
+  }
+  return Array.from(groups.entries()).map(([title, content]) => ({ title, content }));
+});
 
 const openDetails = (card: BookCardType) => {
   selectedCard.value = card;
   isSheetOpen.value = true;
 };
+
+onMounted(async () => {
+  try {
+    allTemplates.value = await getTemplates();
+  } catch (e) {
+    console.error("Shablonlarni yuklashda xatolik", e);
+  }
+});
 </script>
 
 <template>

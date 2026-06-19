@@ -1,74 +1,84 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "#app";
+import Swal from "sweetalert2";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import arrowLeft from "~/assets/images/arrow-left.svg";
-import {
-  loadUploadedPhotos,
-  loadBookDraft,
-  saveCart,
-  type CartLine,
-  type UploadedPhoto,
-} from "~/utils/albumStorage";
+import { loadBookDraft } from "~/utils/albumStorage";
+import { formatMoney } from "~/utils/money";
+import { useAlbums } from "~/composables/useAlbums";
+import { useCart } from "~/composables/useCart";
+import { useContent, type ApiPricing } from "~/composables/useContent";
+import { useApi } from "~/composables/useApi";
 
 import addToCardIcon from "~/assets/images/add-to-card.svg";
 
 const router = useRouter();
+const { listPhotos } = useAlbums();
+const { addItem } = useCart();
+const { getPricing } = useContent();
+const { errorMessage } = useApi();
 
-const photos = ref<UploadedPhoto[]>([]);
+interface PreviewPhoto { name: string; url: string }
+const photos = ref<PreviewPhoto[]>([]);
 const activeIndex = ref(0);
 
 const draft = computed(() => loadBookDraft());
+const albumId = ref<string>("");
+const pricing = ref<ApiPricing | null>(null);
+const adding = ref(false);
 
 const activePhoto = computed(() => photos.value[activeIndex.value] ?? null);
-
 const bookPages = computed(() => draft.value?.bookPages ?? 20);
+
+// Tanlangan sahifa soni uchun narx
+const priceInfo = computed(() => {
+  const opt = pricing.value?.photobook.pageOptions.find((o) => o.pages === bookPages.value);
+  return opt ?? pricing.value?.photobook.pageOptions[0] ?? null;
+});
+const priceLabel = computed(() => formatMoney(priceInfo.value?.price));
+const oldPriceLabel = computed(() => (priceInfo.value?.oldPrice ? formatMoney(priceInfo.value.oldPrice) : ""));
 
 const previewTextTitle = ref("");
 const previewTextContent = ref("");
 
-onMounted(() => {
-  photos.value = loadUploadedPhotos();
-  if (!photos.value.length) {
+onMounted(async () => {
+  const d = loadBookDraft();
+  if (!d?.albumId) {
     router.replace("/upload");
     return;
   }
-  activeIndex.value = 0;
+  albumId.value = d.albumId;
   previewTextTitle.value = sessionStorage.getItem("previewTextTitle") ?? "";
   previewTextContent.value = sessionStorage.getItem("previewTextContent") ?? "";
+
+  try {
+    const [apiPhotos, pr] = await Promise.all([listPhotos(albumId.value), getPricing()]);
+    photos.value = apiPhotos.map((p) => ({
+      name: p.fileName,
+      url: p.thumbnailUrl || p.originalUrl || "",
+    }));
+    pricing.value = pr;
+  } catch (e) {
+    console.error(e);
+  }
 });
 
 const goBack = () => {
   router.push("/upload/editor");
 };
 
-const addToCart = () => {
-  const list = photos.value;
-  if (!list.length) return;
-
-  const d = draft.value;
-  const title = d
-    ? `${d.templateTitle} / ${d.colorName}`
-    : "Custom travel book";
-
-  const line: CartLine = {
-    id: `cart-${Date.now()}`,
-    coverDataUrl: String(list[0].url),
-    title,
-    bookPages: d?.bookPages ?? 20,
-    photoCount: list.length,
-    oldPrice: "$65.98",
-    newPrice: "$32.99",
-  };
-
-  // saveCart([line]);
+const addToCart = async () => {
+  if (!albumId.value || adding.value) return;
+  adding.value = true;
   try {
-    saveCart([line]);
-  } catch {
-    // localStorage quota exceeded — save without the large cover image
-    saveCart([{ ...line, coverDataUrl: "" }]);
+    await addItem(albumId.value, 1);
+    router.push("/cart");
+  } catch (e) {
+    Swal.fire({ icon: "error", title: "Xatolik", text: errorMessage(e), width: "395px" });
+  } finally {
+    adding.value = false;
   }
-  router.push("/cart");
 };
 </script>
 
@@ -98,15 +108,12 @@ const addToCart = () => {
         <div class="preview-spread-right">
           <img :src="String(activePhoto.url)" :alt="activePhoto.name" />
 
-          <span v-if="currentSpread?.rightPage?.textTitle" class="preview-cap">
-            {{ currentSpread?.rightPage?.textTitle }}
+          <span v-if="previewTextTitle" class="preview-cap">
+            {{ previewTextTitle }}
           </span>
 
-          <span
-            v-if="currentSpread?.right?.textContent"
-            class="preview-cap muted"
-          >
-            {{ currentSpread?.rightPage?.textContent }}
+          <span v-if="previewTextContent" class="preview-cap muted">
+            {{ previewTextContent }}
           </span>
 
           <!-- <span class="preview-cap">Title</span>
@@ -138,19 +145,19 @@ const addToCart = () => {
 
         <div class="preview-book-info">
           <p class="preview-sheet-right">11.5" x 8.5" vertical hardcover</p>
-          <p class="preview-sheet-left">$32.99</p>
+          <p class="preview-sheet-left">{{ priceLabel }}</p>
         </div>
       </div>
 
       <div class="preview-book-info-wrapper">
         <div class="preview-book-info">
-          <p class="preview-sheet-left">Additional pages</p>
-          <p class="preview-sheet-right">0</p>
+          <p class="preview-sheet-left">Photos</p>
+          <p class="preview-sheet-right">{{ photos.length }}</p>
         </div>
 
-        <div class="preview-book-info">
-          <p class="preview-sheet-right">0 x gloss paper</p>
-          <p class="preview-sheet-left">$0</p>
+        <div v-if="oldPriceLabel" class="preview-book-info">
+          <p class="preview-sheet-right">Old price</p>
+          <p class="preview-sheet-left"><s>{{ oldPriceLabel }}</s></p>
         </div>
       </div>
       <!-- <p class="preview-sheet-line">
@@ -160,9 +167,9 @@ const addToCart = () => {
       <p class="preview-sheet-line price">$32.99</p>
       <p class="preview-sheet-muted">Additional pages: 0 × gloss paper — $0</p> -->
 
-      <BaseButton class="preview-add-cart" @click="addToCart">
+      <BaseButton class="preview-add-cart" :disabled="adding" @click="addToCart">
         <img :src="addToCardIcon" alt="icon" />
-        Add to cart
+        {{ adding ? "..." : "Add to cart" }}
       </BaseButton>
     </div>
   </div>

@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["close"]);
 
-const pageOptions = [10, 20, 30] as const;
+const pageOptions = computed(() => props.card?.pageOptions?.length ? props.card.pageOptions : [10, 20, 30]);
 const selectedBookPages = ref<number>(10);
 
 const chooseTemplate = () => {
@@ -24,6 +24,8 @@ const chooseTemplate = () => {
     bookPages: selectedBookPages.value,
     templateTitle: card.title,
     colorName: card.colorName,
+    templateId: card.id,
+    coverImage: card.images?.[0],
   });
   close();
   router.push({
@@ -39,7 +41,7 @@ watch(
   () => props.card,
   () => {
     activeIndex.value = 0;
-    selectedBookPages.value = 10;
+    selectedBookPages.value = pageOptions.value[0] ?? 10;
   },
 );
 

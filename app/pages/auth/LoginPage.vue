@@ -5,8 +5,11 @@ import { useI18n } from 'vue-i18n';
 import { ref, computed } from 'vue' // Явно добавили computed для стабильности типов
 
 const { locales, locale, setLocale } = useI18n()
+const { sendOtp, errorMessage } = useAuth()
 
 const phone = ref('')
+const loading = ref(false)
+const errorText = ref('')
 const isPhoneValid = computed(() => {
   return phone.value.replace(/\D/g, '').length === 12
 })
@@ -15,9 +18,19 @@ definePageMeta({
   layout: "auth",
 })
 
-const goToOtp = () => {
-  if (!isPhoneValid.value) return
-  navigateTo('/auth/OtpPage')
+const goToOtp = async () => {
+  if (!isPhoneValid.value || loading.value) return
+  errorText.value = ''
+  loading.value = true
+  try {
+    const formatted = '+' + phone.value.replace(/\D/g, '')
+    await sendOtp(formatted)
+    await navigateTo('/auth/OtpPage')
+  } catch (e) {
+    errorText.value = errorMessage(e, 'Kod yuborishda xatolik')
+  } finally {
+    loading.value = false
+  }
 }
 
 const onLanguageChange = (event: Event) => {
@@ -52,10 +65,12 @@ const onLanguageChange = (event: Event) => {
         :mask="'+998 (##) ###-##-##'" 
       />
       
-      <BaseButton variant="primary" size="sm" :disabled="!isPhoneValid" @click="goToOtp">
-        {{ $t('auth.loginButton') }}
+      <BaseButton variant="primary" size="sm" :disabled="!isPhoneValid || loading" @click="goToOtp">
+        {{ loading ? '...' : $t('auth.loginButton') }}
       </BaseButton>
-      
+
+      <p v-if="errorText" class="login-error">{{ errorText }}</p>
+
       <p class="login-privacy">
         {{ $t('auth.privacyPolicy') }}
       </p>
@@ -112,6 +127,12 @@ const onLanguageChange = (event: Event) => {
   font-size: 16px;
   font-weight: 400;
   color: var(--black-grey-color);
+  text-align: center;
+}
+
+.login-error {
+  font-size: 14px;
+  color: #e53935;
   text-align: center;
 }
 </style>

@@ -2,6 +2,12 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
+  // Mobil-first SPA: token localStorage'da, auth guard klientda — SSR shart emas.
+  ssr: false,
+
+  // =============================================
+  // API manzillari app/utils/apiBase.ts da (env ishlatilmaydi, import.meta.dev orqali).
+
   // =============================================
   // Подключение глобальных стилей
   css: [

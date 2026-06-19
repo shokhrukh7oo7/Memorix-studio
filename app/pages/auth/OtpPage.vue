@@ -6,6 +6,9 @@ definePageMeta({
   layout: "auth",
 });
 
+const { verifyOtp, sendOtp, pendingPhone, errorMessage } = useAuth();
+const loading = ref(false);
+
 const OTP_LENGTH = 4;
 
 /** =======  STATE ======= */
@@ -70,18 +73,40 @@ function checkComplete() {
 }
 
 /** ======= COMPLETE EVENT ======= */
-function handleSubmit() {
-  if (!isComplete.value) return;
+async function handleSubmit() {
+  if (!isComplete.value || loading.value) return;
 
   const code = values.value.join("");
-  console.log("OTP:", code);
-  navigateTo("/auth/LoginName");
-
-  // тут отправка на backend
+  isError.value = false;
+  loading.value = true;
+  try {
+    const result = await verifyOtp(code);
+    // Yangi foydalanuvchi yoki ismi yo'q bo'lsa — ism kiritish sahifasiga
+    if (result.isNewUser || !result.user.fullName) {
+      await navigateTo("/auth/LoginName");
+    } else {
+      await navigateTo("/");
+    }
+  } catch (e) {
+    isError.value = true;
+    errorText.value = errorMessage(e, "Kod noto'g'ri");
+    values.value = Array(OTP_LENGTH).fill("");
+    isComplete.value = false;
+    focusInput(0);
+  } finally {
+    loading.value = false;
+  }
 }
+
+const errorText = ref("");
 
 /** ============== */
 onMounted(() => {
+  // Telefon raqami yo'q bo'lsa — login sahifasiga qaytaramiz
+  if (!pendingPhone.value) {
+    navigateTo("/auth/LoginPage");
+    return;
+  }
   focusInput(0);
 });
 </script>
@@ -110,14 +135,16 @@ onMounted(() => {
       />
     </div>
 
+    <p v-if="errorText" class="otp-error">{{ errorText }}</p>
+
     <div class="confirm-btn-wrapper">
       <BaseButton
         variant="primary"
         size="sm"
-        :disabled="!isComplete"
+        :disabled="!isComplete || loading"
         @click="handleSubmit"
       >
-        Confirm
+        {{ loading ? '...' : 'Confirm' }}
       </BaseButton>
 
       <NuxtLink to="/auth/LoginPage" class="change-phone-link">
@@ -168,6 +195,12 @@ onMounted(() => {
   opacity: 0.7;
   text-align: center;
   max-width: 260px;
+}
+
+.otp-error {
+  font-size: 14px;
+  color: #e53935;
+  text-align: center;
 }
 
 /* OTP INPUTS */

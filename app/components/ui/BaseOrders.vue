@@ -6,6 +6,7 @@ const props = defineProps<{
   title: string;
   status: OrderStatus;
   price: string;
+  orderId?: string;
 }>();
 
 function statusClass(status: OrderStatus): string {
@@ -18,7 +19,7 @@ function statusClass(status: OrderStatus): string {
 
 <template>
   <div class="my-orders-container">
-    <NuxtLink to="/order-info" class="my-orders-item">
+    <NuxtLink :to="orderId ? `/order-info?id=${orderId}` : '/order-info'" class="my-orders-item">
       <div class="my-order-image-wrapper">
         <img :src="image" alt="image" />
       </div>

@@ -4,6 +4,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import { computed, useSlots } from "vue";
 
 // props (по желанию можно расширять)
 const props = defineProps<{
@@ -12,6 +13,18 @@ const props = defineProps<{
 }>();
 
 const modules = [Autoplay];
+
+const slots = useSlots();
+const slideCount = computed(() => {
+  const nodes = slots.default?.() ?? [];
+  let count = 0;
+  for (const node of nodes) {
+    if (Array.isArray(node.children)) count += node.children.length;
+    else count += 1;
+  }
+  return count;
+});
+const enableLoop = computed(() => slideCount.value > (props.slidesPerView || 1) * 2);
 </script>
 
 <template>
@@ -20,7 +33,7 @@ const modules = [Autoplay];
       :modules="modules"
       :slides-per-view="props.slidesPerView || 1"
       :space-between="props.spaceBetween || 10"
-      :loop="true"
+      :loop="enableLoop"
       :autoplay="{
         delay: 2000,
         disableOnInteraction: false,

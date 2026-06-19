@@ -5,15 +5,19 @@ import arrowLeft from "~/assets/images/arrow-left.svg";
 import logoBlack from "~/assets/images/logo-black.png";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import {
-  saveUploadedPhotos,
   loadBookDraft,
-  type UploadedPhoto,
+  saveBookDraft,
 } from "~/utils/albumStorage";
+import { useAlbums } from "~/composables/useAlbums";
+import { useApi } from "~/composables/useApi";
 
 import { useRoute, useRouter } from "#app";
 
 const route = useRoute();
 const router = useRouter();
+const { createAlbum, uploadPhotos } = useAlbums();
+const { errorMessage } = useApi();
+const uploading = ref(false);
 
 const goBack = () => {
   router.back();
@@ -59,9 +63,8 @@ const openUpload = () => {
   fileInput.value?.click();
 };
 
-const onUpload = (e: Event) => {
+const onUpload = async (e: Event) => {
   const target = e.target as HTMLInputElement;
-
   if (!target.files) return;
 
   const bookPages = Number(pageCount.value);
@@ -76,33 +79,58 @@ const onUpload = (e: Event) => {
     return;
   }
 
-  const selectedFiles = Array.from(target.files);
-  if (selectedFiles.length < 1) {
-    target.value = "";
-    return;
+  let selectedFiles = Array.from(target.files);
+  target.value = "";
+  if (selectedFiles.length < 1) return;
+
+  const MAX_PHOTOS = 350;
+  if (selectedFiles.length > MAX_PHOTOS) {
+    selectedFiles = selectedFiles.slice(0, MAX_PHOTOS);
+    Swal.fire({
+      icon: "info",
+      title: "Limit",
+      text: `Faqat ${MAX_PHOTOS} ta rasm qoʻshildi (albom limiti).`,
+      width: "395px",
+    });
   }
 
-  const readers = selectedFiles.map((file) => {
-    return new Promise<UploadedPhoto>((resolve) => {
-      const reader = new FileReader();
+  uploading.value = true;
+  try {
+    const draft = loadBookDraft();
+    // Albom mavjud bo'lmasa — yaratamiz (templateId draftdan, bo'lmasa null)
+    let albumId = draft?.albumId;
+    if (!albumId) {
+      const album = await createAlbum({
+        templateId: draft?.templateId ?? null,
+        pageCount: bookPages,
+      });
+      albumId = album.id;
+    }
 
-      reader.onload = () => {
-        resolve({
-          name: file.name,
-          url: reader.result,
-        });
-      };
+    // Haqiqiy fayllarni serverga yuklash
+    await uploadPhotos(albumId, selectedFiles);
 
-      reader.readAsDataURL(file);
+    // Draftga albom va sahifa sonini saqlaymiz
+    saveBookDraft({
+      bookPages,
+      templateTitle: draft?.templateTitle ?? "",
+      colorName: draft?.colorName ?? "",
+      templateId: draft?.templateId ?? null,
+      coverImage: draft?.coverImage,
+      albumId,
     });
-  });
 
-  Promise.all(readers).then((images) => {
-    saveUploadedPhotos(images);
     router.push("/upload/upload");
-  });
-
-  target.value = "";
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Yuklashda xatolik",
+      text: errorMessage(err, "Rasmlarni yuklab bo'lmadi"),
+      width: "395px",
+    });
+  } finally {
+    uploading.value = false;
+  }
 };
 </script>
 
@@ -147,7 +175,9 @@ const onUpload = (e: Event) => {
     </div>
 
     <div class="upload-add-photos">
-      <BaseButton @click="openUpload"> + Add photos </BaseButton>
+      <BaseButton :disabled="uploading" @click="openUpload">
+        {{ uploading ? "Yuklanmoqda..." : "+ Add photos" }}
+      </BaseButton>
 
       <input
         ref="fileInput"

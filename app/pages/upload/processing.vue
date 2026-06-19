@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "#app";
-import { loadUploadedPhotos } from "~/utils/albumStorage";
+import Swal from "sweetalert2";
+import { loadBookDraft } from "~/utils/albumStorage";
+import { useAlbums } from "~/composables/useAlbums";
+import { useApi } from "~/composables/useApi";
 
 const router = useRouter();
+const { startProcessing, getAlbum, listPhotos } = useAlbums();
+const { errorMessage } = useApi();
 
 const thumbSrc = ref("");
 
@@ -25,34 +30,77 @@ const stepStates = computed<StepState[]>(() => {
   return ["active", "pending", "pending"];
 });
 
-let raf = 0;
-const started = ref(0);
+let pollTimer: ReturnType<typeof setTimeout> | null = null;
+let smoothTimer: ReturnType<typeof setInterval> | null = null;
+const albumId = ref("");
 
-onMounted(() => {
-  const photos = loadUploadedPhotos();
-  if (!photos.length) {
-    router.replace("/upload");
-    return;
-  }
-  thumbSrc.value = photos[0]?.url ? String(photos[0].url) : "";
+async function poll() {
+  try {
+    const album = await getAlbum(albumId.value);
+    const backendProgress = (album as { processingProgress?: number }).processingProgress ?? 0;
+    if (backendProgress > progress.value) progress.value = Math.min(99, backendProgress);
 
-  started.value = performance.now();
-  const duration = 3200;
-
-  const tick = (now: number) => {
-    const t = Math.min(1, (now - started.value) / duration);
-    progress.value = Math.round(t * 100);
-    if (t >= 1) {
+    if (album.status === "ready" || album.status === "ordered") {
+      progress.value = 100;
+      cleanup();
       router.replace("/upload/editor");
       return;
     }
-    raf = requestAnimationFrame(tick);
-  };
-  raf = requestAnimationFrame(tick);
+    if (album.status === "draft") {
+      // processing xato bilan tugadi
+      cleanup();
+      Swal.fire({ icon: "error", title: "Xatolik", text: "Ishlov berishda xatolik", width: "395px" });
+      router.replace("/upload/upload");
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  pollTimer = setTimeout(poll, 1000);
+}
+
+function cleanup() {
+  if (pollTimer) clearTimeout(pollTimer);
+  if (smoothTimer) clearInterval(smoothTimer);
+}
+
+onMounted(async () => {
+  const draft = loadBookDraft();
+  if (!draft?.albumId) {
+    router.replace("/upload");
+    return;
+  }
+  albumId.value = draft.albumId;
+  thumbSrc.value = draft.coverImage ?? "";
+
+  // Cover bo'lmasa — birinchi rasmni olishga harakat
+  if (!thumbSrc.value) {
+    try {
+      const photos = await listPhotos(albumId.value);
+      thumbSrc.value = photos[0]?.thumbnailUrl || photos[0]?.originalUrl || "";
+    } catch {
+      /* ixtiyoriy */
+    }
+  }
+
+  // Animatsiya silliq bo'lishi uchun progressni asta oshirib turamiz
+  smoothTimer = setInterval(() => {
+    if (progress.value < 95) progress.value += 1;
+  }, 120);
+
+  try {
+    await startProcessing(albumId.value);
+  } catch (e) {
+    cleanup();
+    Swal.fire({ icon: "error", title: "Xatolik", text: errorMessage(e), width: "395px" });
+    router.replace("/upload/upload");
+    return;
+  }
+  poll();
 });
 
 onUnmounted(() => {
-  if (raf) cancelAnimationFrame(raf);
+  cleanup();
 });
 </script>
 

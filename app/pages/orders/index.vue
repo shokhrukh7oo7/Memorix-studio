@@ -4,60 +4,46 @@ import BaseButton from "~/components/ui/BaseButton.vue";
 import BaseOrder from "~/components/ui/BaseOrders.vue";
 
 import arrowLeft from "~/assets/images/arrow-left.svg";
-import bestSellerImage1 from "~/assets/images/swiper/bestSeller-1.png";
-import bestSellerImage2 from "~/assets/images/swiper/bestSeller-2.png";
-import bestSellerImage3 from "~/assets/images/swiper/bestSeller-3.png";
-import bestSellerImage4 from "~/assets/images/swiper/bestSeller-4.png";
-import { loadActiveOrders, type StoredOrder } from "~/utils/albumStorage";
+import orderPlaceholder from "~/assets/images/quality.png";
+import { formatMoney } from "~/utils/money";
+import { orderStatusLabel, isHistoryStatus } from "~/utils/orderStatus";
+import { useOrders, type OrderSummary } from "~/composables/useOrders";
 
 type TabName = "Active" | "History";
 const activeTab = ref<TabName>("Active");
 
 import { useRouter } from "#app";
 const router = useRouter();
+const { listOrders } = useOrders();
 
 const goBack = () => {
   router.back();
 };
 
-const userActive = ref<StoredOrder[]>([]);
+const orders = ref<OrderSummary[]>([]);
 
-onMounted(() => {
-  userActive.value = loadActiveOrders();
+onMounted(async () => {
+  try {
+    orders.value = await listOrders(1, 50);
+  } catch (e) {
+    console.error(e);
+  }
 });
 
-const demoActive: StoredOrder[] = [
-  {
-    image: bestSellerImage1,
-    title: "Sunkissed / Daisy",
-    status: "Pending",
-    price: "$22.75",
-  },
-  {
-    image: bestSellerImage2,
-    title: "Summer Pack",
-    status: "Pending",
-    price: "$35.99",
-  },
-];
+const toView = (o: OrderSummary) => ({
+  id: o.id,
+  image: orderPlaceholder,
+  title: o.orderNumber,
+  status: orderStatusLabel(o.status),
+  price: formatMoney(o.total),
+});
 
-const demoHistory: StoredOrder[] = [
-  {
-    image: bestSellerImage3,
-    title: "Sunkissed / Daisy",
-    status: "Completed",
-    price: "$55.00",
-  },
-  {
-    image: bestSellerImage4,
-    title: "Premium Pack",
-    status: "Completed",
-    price: "$120.00",
-  },
-];
-
-const activeOrders = computed(() => [...userActive.value, ...demoActive]);
-const historyOrders = computed(() => demoHistory);
+const activeOrders = computed(() =>
+  orders.value.filter((o) => !isHistoryStatus(o.status)).map(toView),
+);
+const historyOrders = computed(() =>
+  orders.value.filter((o) => isHistoryStatus(o.status)).map(toView),
+);
 </script>
 
 <template>
@@ -94,6 +80,7 @@ const historyOrders = computed(() => demoHistory);
             :title="order.title"
             :status="order.status"
             :price="order.price"
+            :order-id="order.id"
           />
         </div>
       </div>
@@ -107,6 +94,7 @@ const historyOrders = computed(() => demoHistory);
             :title="order.title"
             :status="order.status"
             :price="order.price"
+            :order-id="order.id"
           />
         </div>
       </div>
@@ -203,6 +191,7 @@ const historyOrders = [
             :title="order.title"
             :status="order.status"
             :price="order.price"
+            :order-id="order.id"
           />
         </div>
       </div>
@@ -216,6 +205,7 @@ const historyOrders = [
             :title="order.title"
             :status="order.status"
             :price="order.price"
+            :order-id="order.id"
           />
         </div>
       </div>

@@ -1,28 +1,24 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
+import { useAuth } from "~/composables/useAuth";
 
 import logoMain from "~/assets/images/logo-main.png";
 import shoppingIcon from "~/assets/images/shopping.svg";
 
-// В реальном приложении замените на store (Pinia)
-const isLoggedIn = ref(true);
+const { user, isLoggedIn, logout } = useAuth();
 const isMenuOpen = ref(false);
 
-// Данные пользователя (заглушка)
-const user = ref({
-  name: "beck_makhkamov",
-  id: "998765",
-});
+const userName = computed(() => user.value?.fullName || user.value?.phone || "User");
+const userId = computed(() => user.value?.publicId || "");
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 
-const handleLogout = () => {
-  isLoggedIn.value = false;
+const handleLogout = async () => {
   isMenuOpen.value = false;
-  navigateTo("/auth/LoginPage");
+  await logout();
 };
 
 const goToLogin = () => {
@@ -66,8 +62,8 @@ const goToLogin = () => {
                       <img src="/assets/images/user-circle.svg" alt="icon" />
                     </div>
                     <div class="text">
-                      <span class="name">{{ user.name }}</span>
-                      <span class="sub-text id">ID: {{ user.id }}</span>
+                      <span class="name">{{ userName }}</span>
+                      <span class="sub-text id">ID: {{ userId }}</span>
                     </div>
                   </div>
 

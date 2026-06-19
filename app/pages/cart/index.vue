@@ -1,50 +1,103 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "#app";
+import Swal from "sweetalert2";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import arrowLeft from "~/assets/images/arrow-left.svg";
 import giftImage from "~/assets/images/gift.png";
-import {
-  loadCart,
-  loadUploadedPhotos,
-  clearCart,
-  prependActiveOrder,
-  savePendingOrder,
-  loadBookDraft,
-  type CartLine,
-} from "~/utils/albumStorage";
+import { clearEditorSessionData } from "~/utils/albumStorage";
+import { formatMoney } from "~/utils/money";
+import { useCart, type CartView } from "~/composables/useCart";
+import { useContent, type ApiRegion, type ApiPricing } from "~/composables/useContent";
+import { useOrders } from "~/composables/useOrders";
+import { useAuth } from "~/composables/useAuth";
+import { useApi } from "~/composables/useApi";
 import trashIcon from "~/assets/images/trash.svg";
 import arrowLeftCircleIcon from "~/assets/images/arrow-circle.svg";
 
 const router = useRouter();
+const { getCart, updateItem, removeItem } = useCart();
+const { getRegions, getPricing } = useContent();
+const { createOrder } = useOrders();
+const { user } = useAuth();
+const { errorMessage } = useApi();
 
-const cart = ref<CartLine[]>([]);
-const qty = ref(1);
-const giftWrapped = ref(true);
+const cartView = ref<CartView | null>(null);
+const regions = ref<ApiRegion[]>([]);
+const pricing = ref<ApiPricing | null>(null);
+
+const giftPrice = computed(
+  () => pricing.value?.extraServices.find((s) => s.id === "gift_wrap")?.price ?? 15000,
+);
+const giftCostLabel = computed(() => formatMoney(giftPrice.value));
 const showPayModal = ref(false);
 const agreedLowQuality = ref(false);
-const uploadedPhotos = ref<{ url: string | ArrayBuffer | null }[]>([]);
+const submitting = ref(false);
 
-onMounted(() => {
-  cart.value = loadCart();
-  uploadedPhotos.value = loadUploadedPhotos();
+// Checkout form
+const form = ref({
+  receiverName: "",
+  receiverPhone: "",
+  regionId: "",
+  address: "",
 });
 
-const coverSrc = computed(() => {
-  if (line.value?.coverDataUrl) return line.value.coverDataUrl;
-  const first = uploadedPhotos.value[0];
-  return first ? String(first.url) : "";
+const items = computed(() => cartView.value?.items ?? []);
+const line = computed(() => items.value[0] ?? null);
+const summary = computed(() => cartView.value?.summary ?? null);
+
+const coverSrc = computed(() => line.value?.album.coverUrl ?? "");
+
+// Gift wrap — barcha itemlarda gift_wrap bormi
+const giftWrapped = computed({
+  get: () => items.value.some((i) => i.extraServices.some((s) => s.id === "gift_wrap")),
+  set: (val: boolean) => void toggleGift(val),
 });
 
-const line = computed(() => cart.value[0] ?? null);
+const cartTotal = computed(() => formatMoney(summary.value?.total));
 
-const cartTotal = computed(() => {
-  if (!line.value) return "$0";
-  const base = 32.99;
-  const gift = giftWrapped.value ? 2.99 : 0;
-  const total = (base + gift) * qty.value;
-  return `$${total.toFixed(2)}`;
+async function loadCart() {
+  cartView.value = await getCart();
+}
+
+onMounted(async () => {
+  try {
+    const [cv, rg, pr] = await Promise.all([getCart(), getRegions(), getPricing()]);
+    cartView.value = cv;
+    regions.value = rg;
+    pricing.value = pr;
+    if (user.value) {
+      form.value.receiverName = user.value.fullName ?? "";
+      form.value.receiverPhone = user.value.phone ?? "";
+    }
+    if (rg[0]) form.value.regionId = rg[0].id;
+  } catch (e) {
+    console.error(e);
+  }
 });
+
+async function changeQty(itemId: string, delta: number) {
+  const item = items.value.find((i) => i.id === itemId);
+  if (!item) return;
+  const next = Math.max(1, item.quantity + delta);
+  if (next === item.quantity) return;
+  try {
+    cartView.value = await updateItem(itemId, { quantity: next });
+  } catch (e) {
+    Swal.fire({ icon: "error", title: "Xatolik", text: errorMessage(e), width: "395px" });
+  }
+}
+
+async function toggleGift(val: boolean) {
+  try {
+    for (const item of items.value) {
+      const services = val ? ["gift_wrap"] : [];
+      cartView.value = await updateItem(item.id, { extraServices: services });
+    }
+  } catch (e) {
+    Swal.fire({ icon: "error", title: "Xatolik", text: errorMessage(e), width: "395px" });
+  }
+}
 
 const goBack = () => {
   router.back();
@@ -56,67 +109,56 @@ const openCheckoutModal = () => {
   agreedLowQuality.value = false;
 };
 
-const removeFromCart = () => {
-  clearCart();
-  cart.value = [];
+const removeFromCart = async (itemId: string) => {
+  try {
+    cartView.value = await removeItem(itemId);
+  } catch (e) {
+    Swal.fire({ icon: "error", title: "Xatolik", text: errorMessage(e), width: "395px" });
+  }
 };
 
-const confirmCheckout = () => {
-  if (!line.value || !agreedLowQuality.value) return;
-
-  const orderId = `MX-${Date.now().toString(36).toUpperCase().slice(-10)}`;
-
-  // prependActiveOrder({
-  //   image: coverSrc.value,
-  //   title: line.value.title,
-  //   status: "In review",
-  //   price: line.value.newPrice,
-  // });
-  try {
-    prependActiveOrder({
-      image: coverSrc.value,
-      title: line.value.title,
-      status: "In review",
-      price: line.value.newPrice,
-    });
-  } catch {
-    prependActiveOrder({
-      image: "",
-      title: line.value.title,
-      status: "In review",
-      price: line.value.newPrice,
-    });
+const confirmCheckout = async () => {
+  if (!line.value || !agreedLowQuality.value || submitting.value) return;
+  // Validatsiya
+  if (!form.value.receiverName || form.value.receiverName.length < 2) {
+    Swal.fire({ icon: "warning", title: "Ism", text: "Qabul qiluvchi ismini kiriting", width: "395px" });
+    return;
+  }
+  if (!/^\+998\d{9}$/.test(form.value.receiverPhone)) {
+    Swal.fire({ icon: "warning", title: "Telefon", text: "Telefon: +998XXXXXXXXX", width: "395px" });
+    return;
+  }
+  if (!form.value.regionId) {
+    Swal.fire({ icon: "warning", title: "Hudud", text: "Hududni tanlang", width: "395px" });
+    return;
+  }
+  if (!form.value.address || form.value.address.length < 5) {
+    Swal.fire({ icon: "warning", title: "Manzil", text: "Manzilni kiriting", width: "395px" });
+    return;
   }
 
-  // savePendingOrder({
-  //   coverDataUrl: coverSrc.value,
-  //   photoCount: line.value.photoCount,
-  //   title: line.value.title,
-  //   orderId,
-  // });
+  submitting.value = true;
   try {
-    savePendingOrder({
-      coverDataUrl: coverSrc.value,
-      photoCount: line.value.photoCount,
-      title: line.value.title,
-      orderId,
+    await createOrder({
+      paymentMethod: "cash",
+      receiverName: form.value.receiverName,
+      receiverPhone: form.value.receiverPhone,
+      regionId: form.value.regionId,
+      address: form.value.address,
+      agreedLowQuality: agreedLowQuality.value,
     });
-  } catch {
-    savePendingOrder({
-      coverDataUrl: "",
-      photoCount: line.value.photoCount,
-      title: line.value.title,
-      orderId,
-    });
+    clearEditorSessionData();
+    showPayModal.value = false;
+    cartView.value = null;
+    router.push("/orders");
+  } catch (e) {
+    Swal.fire({ icon: "error", title: "Buyurtma xatosi", text: errorMessage(e), width: "395px" });
+  } finally {
+    submitting.value = false;
   }
-
-  clearCart();
-  cart.value = [];
-  showPayModal.value = false;
-  router.push("/orders");
 };
 
-const bookDraft = computed(() => loadBookDraft());
+const bookDraft = computed(() => (line.value ? { title: line.value.album.title } : null));
 </script>
 
 <template>
@@ -140,28 +182,28 @@ const bookDraft = computed(() => loadBookDraft());
           </div>
           <div class="cart-card-body">
             <div class="cart-card-body-content">
-              <h3>{{ line.title }}</h3>
+              <h3>{{ line.album.title }}</h3>
               <p class="cart-prices">
-                <span class="old">{{ line.oldPrice }}</span>
-                <span class="new">{{ line.newPrice }}</span>
+                <span v-if="line.oldPrice" class="old">{{ formatMoney(line.oldPrice) }}</span>
+                <span class="new">{{ formatMoney(line.unitPrice) }}</span>
               </p>
             </div>
             <div class="cart-row-actions">
               <div class="qty">
                 <p class="qty-title">Qty</p>
                 <div class="qty-counter-wrapper">
-                  <button type="button" @click="qty = Math.max(1, qty - 1)">
+                  <button type="button" @click="changeQty(line.id, -1)">
                     −
                   </button>
-                  <span>{{ qty }}</span>
-                  <button type="button" @click="qty += 1">+</button>
+                  <span>{{ line.quantity }}</span>
+                  <button type="button" @click="changeQty(line.id, 1)">+</button>
                 </div>
               </div>
               <button
                 type="button"
                 class="cart-trash"
                 aria-label="Remove"
-                @click="removeFromCart"
+                @click="removeFromCart(line.id)"
               >
                 <img :src="trashIcon" alt="icon" />
               </button>
@@ -176,15 +218,8 @@ const bookDraft = computed(() => loadBookDraft());
           <li>Cover type: Hardcover</li>
           <li>Size: 11.5″ × 8.5″ Vertical</li>
           <li>Paper finish: Gloss paper</li>
-          <li>
-            Template:
-            {{
-              bookDraft
-                ? `${bookDraft.templateTitle} / ${bookDraft.colorName}`
-                : "Your photos"
-            }}
-          </li>
-          <li>Book pages: {{ line.bookPages }}</li>
+          <li>Template: {{ line.album.title }}</li>
+          <li>Book pages: {{ line.album.pageCount }}</li>
         </ul>
       </div>
 
@@ -197,7 +232,7 @@ const bookDraft = computed(() => loadBookDraft());
               Gift wrapped
             </label>
             <p>Select this option to surprise the recipient.</p>
-            <strong>Additional cost: $2.99</strong>
+            <strong>Additional cost: {{ giftCostLabel }}</strong>
           </div>
           <div class="gift-image">
             <img :src="giftImage" alt="" />
@@ -233,7 +268,28 @@ const bookDraft = computed(() => loadBookDraft());
           >
             ×
           </button>
-          <h3 id="pay-title" class="cart-modal-title">Before you pay</h3>
+          <h3 id="pay-title" class="cart-modal-title">Checkout</h3>
+
+          <div class="checkout-form">
+            <input v-model="form.receiverName" type="text" placeholder="Qabul qiluvchi ismi" />
+            <input v-model="form.receiverPhone" type="tel" placeholder="+998901234567" />
+            <select v-model="form.regionId">
+              <option value="" disabled>Hududni tanlang</option>
+              <option v-for="r in regions" :key="r.id" :value="r.id">
+                {{ r.name }} — {{ formatMoney(r.deliveryFee) }}
+              </option>
+            </select>
+            <textarea v-model="form.address" rows="2" placeholder="Yetkazib berish manzili"></textarea>
+          </div>
+
+          <div class="checkout-summary" v-if="summary">
+            <div><span>Subtotal</span><span>{{ formatMoney(summary.subtotal) }}</span></div>
+            <div v-if="summary.extraServicesTotal"><span>Extra</span><span>{{ formatMoney(summary.extraServicesTotal) }}</span></div>
+            <div v-if="summary.discount"><span>Discount</span><span>−{{ formatMoney(summary.discount) }}</span></div>
+            <div class="checkout-total"><span>Total</span><span>{{ formatMoney(summary.total) }}</span></div>
+            <p class="checkout-pay-note">To'lov: yetkazib berishda naqd (cash)</p>
+          </div>
+
           <p class="cart-modal-warn">
             ⚠ The uploaded files may include low-quality photos that can affect
             printing. We are not responsible for photo quality.
@@ -244,10 +300,10 @@ const bookDraft = computed(() => loadBookDraft());
           </label>
           <BaseButton
             class="cart-modal-submit"
-            :disabled="!agreedLowQuality"
+            :disabled="!agreedLowQuality || submitting"
             @click="confirmCheckout"
           >
-            Go to checkout
+            {{ submitting ? "..." : "Buyurtma berish" }}
           </BaseButton>
         </div>
       </div>
@@ -535,5 +591,49 @@ const bookDraft = computed(() => loadBookDraft());
 .cart-modal-submit :deep(.btn.is-disabled),
 .cart-modal-submit :deep(button:disabled) {
   opacity: 0.45;
+}
+
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.checkout-form input,
+.checkout-form select,
+.checkout-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--display-grey-color);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-work);
+  outline: none;
+}
+
+.checkout-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-family: var(--font-work);
+}
+
+.checkout-summary > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.checkout-summary .checkout-total {
+  font-weight: 700;
+  border-top: 1px solid var(--temp-border-color);
+  padding-top: 6px;
+}
+
+.checkout-pay-note {
+  font-size: 12px;
+  color: var(--black-grey-color);
 }
 </style>

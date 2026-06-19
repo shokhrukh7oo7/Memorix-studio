@@ -12,7 +12,11 @@ import BookCard from "~/components/ui/BookCard.vue";
 import DetailSheet from "~/components/ui/DetailSheet.vue";
 import type { BookCard as BookCardType } from "~/types";
 
-const slidesBrightness = ref<Record<number, string>>({});
+import { useContent, type ApiBanner } from "~/composables/useContent";
+
+const { getHome, getCountries, getTemplates, getFaq } = useContent();
+
+const slidesBrightness = ref<Record<string, string>>({});
 
 // Best seller swiper detail code
 const isSheetOpen = ref(false);
@@ -22,40 +26,15 @@ const openDetails = (card: BookCardType) => {
   selectedCard.value = card;
   isSheetOpen.value = true;
 };
-const bestSellersSlides = ref<BookCardType[]>([
-  {
-    id: 1,
-    title: "Travel Vibes",
-    colorName: "Burgundy",
-    description: "Perfect template for adventure and travel memories",
-    images: [bestSeller1, bestSeller2, bestSeller3],
-  },
-  {
-    id: 2,
-    title: "Love Story",
-    colorName: "Rose Pink",
-    description: "Romantic style for your most special moments",
-    images: [bestSeller4, bestSeller2, bestSeller1],
-  },
-  {
-    id: 3,
-    title: "Classic Memories",
-    colorName: "Navy Blue",
-    description: "Timeless and elegant design for any occasion",
-    images: [book1, book2, book3],
-  },
-  {
-    id: 4,
-    title: "Celebration",
-    colorName: "Golden",
-    description: "Vibrant and festive design for big life events",
-    images: [book4, book5, book6],
-  },
-]);
 
-// 8 марта (год можно менять динамически)
-const targetDate = new Date("2026-03-08T00:00:00");
-// const targetDate = new Date("2026-12-31T23:59:59");
+// ===== API ma'lumotlari =====
+const bestSellersSlides = ref<BookCardType[]>([]);
+const banner = ref<ApiBanner | null>(null);
+
+// Banner countdown sanasi (yo'q bo'lsa — 8-mart fallback)
+const targetDate = computed(() =>
+  banner.value?.countdownTo ? new Date(banner.value.countdownTo) : new Date("2026-03-08T00:00:00"),
+);
 
 const { days, hours, minutes, seconds } = useTimer(targetDate);
 
@@ -63,36 +42,12 @@ const { days, hours, minutes, seconds } = useTimer(targetDate);
 import bannerImg from "~/assets/images/banner.png";
 
 import tempCard1 from "~/assets/images/temp-1.png";
-import tempCard2 from "~/assets/images/temp-2.png";
 
-import cat1 from "~/assets/images/swiper/cat-1.png";
-import cat2 from "~/assets/images/swiper/cat-2.png";
-import cat3 from "~/assets/images/swiper/cat-3.png";
-import cat4 from "~/assets/images/swiper/cat-4.png";
-
-import country1 from "~/assets/images/swiper/country-1.png";
-import country2 from "~/assets/images/swiper/country-2.png";
-import country3 from "~/assets/images/swiper/country-3.png";
-import country4 from "~/assets/images/swiper/country-4.png";
-
-import bestSeller1 from "~/assets/images/swiper/bestSeller-1.png";
-import bestSeller2 from "~/assets/images/swiper/bestSeller-2.png";
-import bestSeller3 from "~/assets/images/swiper/bestSeller-3.png";
-import bestSeller4 from "~/assets/images/swiper/bestSeller-4.png";
-
-import book1 from "~/assets/images/swiper/book-1.png";
-import book2 from "~/assets/images/swiper/book-2.png";
-import book3 from "~/assets/images/swiper/book-3.png";
-import book4 from "~/assets/images/swiper/book-4.png";
-import book5 from "~/assets/images/swiper/book-5.png";
-import book6 from "~/assets/images/swiper/book-6.png";
 
 import st1 from "~/assets/images/swiper/st-1.png";
 import st2 from "~/assets/images/swiper/st-2.png";
 import st3 from "~/assets/images/swiper/st-3.png";
 
-import delivery1 from "~/assets/images/swiper/delivery-1.jpg";
-import delivery2 from "~/assets/images/swiper/location-2.png";
 
 import quality from "~/assets/images/quality.png";
 import icon from "~/assets/images/shooting-star.svg";
@@ -110,54 +65,12 @@ const templateCard = [
   },
 ];
 
-const categorySlides = [
-  { id: 1, image: cat1, text: "Travel" },
-  { id: 2, image: cat2, text: "Event" },
-  { id: 3, image: cat3, text: "Birthday" },
-  { id: 4, image: cat4, text: "Wedding" },
-  { id: 5, image: cat1, text: "Travel" },
-  { id: 6, image: cat2, text: "Event" },
-];
+interface Slide { id: string; image: string; text: string }
+interface DeliverySlide { id: string; image: string; text: string; btnText: string; isDark: boolean }
 
-const countrySlides = [
-  { id: 1, image: country1, text: "Egypt" },
-  { id: 2, image: country2, text: "Thailand" },
-  { id: 3, image: country3, text: "Turkey" },
-  { id: 4, image: country4, text: "Vietnam" },
-  { id: 5, image: country1, text: "Egypt" },
-  { id: 6, image: country2, text: "Thailand" },
-];
-
-const deliverySlides = [
-  {
-    id: 1,
-    image: delivery1,
-    text: "FREE DELIVERY TO YOUR REGION",
-    btnText: "Show list",
-    isDark: true,
-  },
-  {
-    id: 2,
-    image: delivery2,
-    text: "DELIVERY TERMS",
-    btnText: "Read more",
-    isDark: false,
-  },
-  {
-    id: 3,
-    image: delivery1,
-    text: "FREE DELIVERY TO YOUR REGION",
-    btnText: "Show list",
-    isDark: false,
-  },
-  {
-    id: 4,
-    image: delivery2,
-    text: "DELIVERY TERMS",
-    btnText: "Read more",
-    isDark: false,
-  },
-];
+const categorySlides = ref<Slide[]>([]);
+const countrySlides = ref<Slide[]>([]);
+const deliverySlides = ref<DeliverySlide[]>([]);
 
 const templateSlides = [
   {
@@ -189,72 +102,63 @@ const templateSlides = [
       "You can fully customize every template in our easy to use editor online! No app needed!",
   },
 ];
-// для подключение к API - просто заменяем categorySlides
-// const { data: categorySlides } = await useFetch('/api/slides')
+const accordionData = ref<{ title: string; content: string }[]>([]);
+
+// ===== Barcha home ma'lumotlarini API'dan yuklash =====
 onMounted(async () => {
-  for (const item of deliverySlides) {
-    const brightness = await getBrightness(item.image);
-    slidesBrightness.value[item.id] = brightness;
+  try {
+    const [home, countries, templates, faq] = await Promise.all([
+      getHome(),
+      getCountries(),
+      getTemplates(),
+      getFaq(),
+    ]);
+
+    banner.value = home.banners[0] ?? null;
+
+    categorySlides.value = home.categories.map((c) => ({
+      id: c.id,
+      image: c.image ?? "",
+      text: c.name,
+    }));
+
+    countrySlides.value = countries.map((c) => ({
+      id: c.id,
+      image: c.image ?? "",
+      text: c.name,
+    }));
+
+    // Best sellers — avval bestseller bo'lganlar, keyin popular
+    bestSellersSlides.value = templates
+      .filter((t) => t.isBestSeller || t.isPopular)
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        colorName: t.colorName,
+        description: t.description,
+        images: t.images,
+        pageOptions: t.pageOptions,
+      }));
+
+    deliverySlides.value = home.infoSlides.map((s) => ({
+      id: s.id,
+      image: s.image ?? "",
+      text: s.text,
+      btnText: s.buttonText ?? "",
+      isDark: s.isDark,
+    }));
+
+    accordionData.value = faq.map((f) => ({ title: f.question, content: f.answer }));
+
+    // Yetkazib berish slaydlari uchun matn rangini hisoblash
+    for (const item of deliverySlides.value) {
+      if (!item.image) continue;
+      slidesBrightness.value[item.id] = await getBrightness(item.image);
+    }
+  } catch (e) {
+    console.error("Home ma'lumotlarini yuklashda xatolik", e);
   }
 });
-
-const accordionData = [
-  {
-    title: "How it works?",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Step-by-step guide",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Features overview",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "User benefits",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Technical details",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Common FAQs",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Troubleshooting tips",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Security measures",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Integration options",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Pricing plans",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-  {
-    title: "Customer testimonials",
-    content:
-      "Online album generators let you create photo albums quickly by uploading your pictures, choosing a layout, and customizing the design. They automatically arrange your photos and provide easy sharing options.",
-  },
-];
 
 const goTemplate = () => {
   navigateTo("/templates");
@@ -265,26 +169,27 @@ const goTemplate = () => {
   <!-- banner section end -->
   <div class="banner-wrapper">
     <div class="banner">
-      <img :src="bannerImg" alt="banner" class="banner-img" />
+      <img :src="banner?.image || bannerImg" alt="banner" class="banner-img" />
 
       <div class="banner-overlay">
-        <h2 class="banner-title">International Woman’s Day</h2>
+        <h2 class="banner-title">{{ banner?.title || "International Woman’s Day" }}</h2>
         <p class="banner-subtitle">
-          Celebrate women with a gift as special as she is
+          {{ banner?.subtitle || "Celebrate women with a gift as special as she is" }}
         </p>
 
         <div class="banner-btn-wrapper">
           <BaseButton class="banner-btn" size="sm" @click="goTemplate"
-            >Shop now</BaseButton
+            >{{ banner?.buttonText || "Shop now" }}</BaseButton
           >
         </div>
 
         <div class="date-wrapper">
-          <p class="banner-promo">
-            30% off with promo code <strong>8MARCH</strong>
+          <p v-if="banner?.promoText || banner?.promoCode" class="banner-promo">
+            {{ banner?.promoText || "30% off with promo code" }}
+            <strong v-if="banner?.promoCode">{{ banner.promoCode }}</strong>
           </p>
 
-          <div class="banner-timer">
+          <div v-if="banner?.countdownTo" class="banner-timer">
             <div class="time-box">{{ days }}d</div>
             <div class="time-box">{{ hours }}h</div>
             <div class="time-box">{{ minutes }}m</div>

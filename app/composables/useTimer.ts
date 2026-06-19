@@ -1,6 +1,6 @@
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, toValue, type MaybeRefOrGetter } from "vue";
 
-export function useTimer(targetDate: Date) {
+export function useTimer(target: MaybeRefOrGetter<Date>) {
     const days = ref("00");
     const hours = ref("00");
     const minutes = ref("00");
@@ -12,8 +12,8 @@ export function useTimer(targetDate: Date) {
 
     const updateTimer = () => {
         const now = new Date().getTime();
-        const target = targetDate.getTime();
-        const diff = target - now;
+        const targetTime = toValue(target).getTime();
+        const diff = targetTime - now;
 
         if (diff <= 0) {
             days.value = "07";

@@ -26,12 +26,14 @@ import stickerIcon from "~/assets/images/sticker.svg";
 // import smartIcon from "~/assets/images/smart.svg";
 
 import {
-  loadUploadedPhotos,
   loadBookDraft,
   type UploadedPhoto,
 } from "~/utils/albumStorage";
+import { useAlbums } from "~/composables/useAlbums";
 
 const router = useRouter();
+const { listPhotos, saveDesign } = useAlbums();
+const albumId = ref<string>("");
 
 // --- СОСТОЯНИЕ СТИКЕРОВ ---
 const activeStickerId = ref<string | null>(null);
@@ -145,6 +147,25 @@ const currentSpread = computed(
   () => bookSpreads.value[currentSpreadIndex.value] || null,
 );
 
+const usedPhotoIndices = computed(() => {
+  const set = new Set<number>();
+  for (const spread of bookSpreads.value) {
+    for (const page of [spread.leftPage, spread.rightPage]) {
+      if (!page) continue;
+      for (const i of page.photoIndices) {
+        if (i >= 0) set.add(i);
+      }
+    }
+  }
+  return set;
+});
+
+const displayedPhotos = computed(() =>
+  photos.value
+    .map((img, idx) => ({ img, idx }))
+    .filter(({ idx }) => activeFilter.value === "all" || !usedPhotoIndices.value.has(idx)),
+);
+
 function goToPrev() {
   if (currentSpreadIndex.value > 0) {
     currentSpreadIndex.value--;
@@ -163,11 +184,26 @@ function selectSpreadFromDropdown(idx: number) {
 }
 
 // --- ИНИЦИАЛИЗАЦИЯ КНИГИ ---
-onMounted(() => {
-  photos.value = loadUploadedPhotos();
+onMounted(async () => {
   const draft = loadBookDraft();
+  if (!draft?.albumId) {
+    router.replace("/upload");
+    return;
+  }
+  albumId.value = draft.albumId;
   if (draft?.bookPages) {
     totalPages.value = Number(draft.bookPages);
+  }
+
+  // Albomning haqiqiy (ishlov berilgan) rasmlarini yuklash
+  try {
+    const apiPhotos = await listPhotos(albumId.value);
+    photos.value = apiPhotos.map((p) => ({
+      name: p.fileName,
+      url: p.thumbnailUrl || p.originalUrl || "",
+    }));
+  } catch (e) {
+    console.error("Rasmlarni yuklashda xatolik", e);
   }
 
   generateInitialLayouts();
@@ -961,14 +997,17 @@ const goPreview = () => {
           </div>
           <div class="horizontal-scroll-gallery">
             <div
-              v-for="(img, idx) in photos"
-              :key="idx"
+              v-for="item in displayedPhotos"
+              :key="item.idx"
               class="scroll-thumb"
-              :class="{ 'selected-thumb': idx === selectedPhotoIndex }"
-              @click="handleSelectPhoto(idx)"
+              :class="{ 'selected-thumb': item.idx === selectedPhotoIndex }"
+              @click="handleSelectPhoto(item.idx)"
             >
-              <img :src="String(img.url)" />
+              <img :src="String(item.img.url)" />
             </div>
+            <p v-if="displayedPhotos.length === 0" class="empty-gallery-hint">
+              {{ activeFilter === "unused" ? "Barcha rasmlar ishlatilgan" : "Rasm yoʻq" }}
+            </p>
           </div>
         </div>
 
@@ -1456,5 +1495,12 @@ const goPreview = () => {
 .ctrl-btn.danger {
   background: #fee2e2;
   color: #ef4444;
+}
+
+.empty-gallery-hint {
+  padding: 16px;
+  color: #9ca3af;
+  font-size: 13px;
+  white-space: nowrap;
 }
 </style>
