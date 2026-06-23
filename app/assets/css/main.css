@@ -1022,6 +1022,12 @@ textarea {
   width: 100px;
   height: 93px;
 }
+.my-orders-container .my-orders-item .my-order-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
 .my-orders-container .my-orders-item .my-order-content-wrapper h6 {
   font-size: 14px;
   font-weight: 500;
